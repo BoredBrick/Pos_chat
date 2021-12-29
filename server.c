@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
                 return 4;
             }
 
+            // TODO: Split strings from buffer registracia (strtok)
+
             if (registracia(buffer, "heslo", "heslo")) {
                 const char *msg = "\n\033[32;1mSERVER: Boli ste uspesne zaregistrovany.\033[0m\n";
                 n = write(newsockfd, msg, strlen(msg) + 1);
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
             perror("Error reading from socket");
             return 4;
         }
-        printf("\n\033[32;1mSERVER: Bola prijata sprava: %s\033[0m", buffer);
+        printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s", buffer);
 
         if (strcmp(buffer, exit) == 0) {
             bolExit = 1;

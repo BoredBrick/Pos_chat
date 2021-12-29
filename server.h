@@ -33,7 +33,7 @@ int registracia(char* login, char* heslo, char* potvrdHeslo) {
         return 1;
 
     } else {
-    // Zadany login sa v databaze pouzivatelov uz nachadza
+        // Zadany login sa v databaze pouzivatelov uz nachadza
         printf("\n\033[32;1mSERVER: Login %s uz existuje.\033[0m\n", pomocna);
         return 0;
     }

@@ -73,9 +73,22 @@ int main(int argc, char *argv[])
 
         if (akcia == 1) {
             while (bolaRegistracia == 0) {
+                char login[30], heslo[30];
                 bzero(buffer, 256);
                 printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-                fgets(buffer, 255, stdin);
+                scanf("%s", &login);
+                getchar();
+                printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
+                scanf("%s", &heslo);
+                getchar();
+                //memset()
+                strcat(buffer, login);
+                strcat(buffer, " ");
+                strcat(buffer, heslo);
+                printf("%s", buffer);
+
+
+                //gets(buffer, 255, stdin);
 
                 buffer[strcspn(buffer, "\n")] = 0;
 

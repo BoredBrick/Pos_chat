@@ -3,4 +3,6 @@ project(Pos_chat C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Pos_chat main.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+add_executable(server server.c)
+add_executable(klient klient.c)

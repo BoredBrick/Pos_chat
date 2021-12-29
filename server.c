@@ -15,18 +15,6 @@
 
 int main(int argc, char *argv[])
 {
-    FILE *fp;
-
-    fp = fopen("file4.txt", "w+");
-
-    fputs("This is c programming.", fp);
-    fputs("This is a system programming language.", fp);
-
-    fclose(fp);
-
-    return(0);
-    return 1;
-
     int sockfd, newsockfd;
     socklen_t cli_len;
     struct sockaddr_in serv_addr, cli_addr;
@@ -56,6 +44,9 @@ int main(int argc, char *argv[])
         perror("Error binding socket address");
         return 2;
     }
+
+    printf("\033[32;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
+
     listen(sockfd, 5);
 
     //nadviazeme spojenie s jednym klientskym socketom
@@ -66,7 +57,38 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    //while(true) {
+    int bolExit = 0;
+    char* exit = "exit\n";
+    int i = 0;
+    while(bolExit == 0) {
+
+        if (i < 1) {
+            bzero(buffer, 256);
+            n = read(newsockfd, buffer, 255);
+            if (n < 0) {
+                perror("Error reading from socket");
+                return 4;
+            }
+
+            if (registracia(buffer, "heslo", "heslo")) {
+                const char *msg = "\n\033[32;1mSERVER: Boli ste uspesne zaregistrovany.\033[0m\n";
+                n = write(newsockfd, msg, strlen(msg) + 1);
+                if (n < 0) {
+                    perror("Error writing to socket");
+                    return 5;
+                }
+            } else {
+                const char *msg = "\n\033[32;1mSERVER: Neboli ste zaregistrovany. Zadany login uz existuje.\033[0m\n";
+                n = write(newsockfd, msg, strlen(msg) + 1);
+                if (n < 0) {
+                    perror("Error writing to socket");
+                    return 5;
+                }
+            }
+
+        }
+
+        i++;
 
         bzero(buffer, 256);
         n = read(newsockfd, buffer, 255);
@@ -74,48 +96,22 @@ int main(int argc, char *argv[])
             perror("Error reading from socket");
             return 4;
         }
-        printf("Here is the message: %s\n", buffer);
+        printf("\n\033[32;1mSERVER: Bola prijata sprava: %s\033[0m", buffer);
 
-        registracia("meno", "heslo", "heslo");
+        if (strcmp(buffer, exit) == 0) {
+            bolExit = 1;
+        }
 
-        const char *msg = "I got your message";
+        const char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");
             return 5;
         }
-  //  }
+    }
 
     close(newsockfd);
     close(sockfd);
 
     return 0;
-}
-int registracia(char* login, char* heslo, char* potvrdHeslo) {
-    FILE *subor;
-    subor = fopen("zaregistrovani_pouzivatelia.txt", "w");
-    fprintf(subor,"AAA");
-    fclose(subor);
-    return 1;
-
-    bool jeUzZaregistrovany = false;
-//    while (subor != EOF) {
-//        if (strcmp((const char *) fscanf(subor, "%s"), login) == 0) {
-//            jeUzZaregistrovany = true;
-//            break;
-//        }
-//    }
-
-    if (!jeUzZaregistrovany) {
-        fprintf(subor, login);
-        fprintf(subor, " ");
-        fprintf(subor, potvrdHeslo);
-        fprintf(subor, "\n");
-        fclose(subor);
-        return 1;
-
-    } else {
-// Zadany login sa v databaze pouzivatelov uz nachadza
-        return 0;
-    }
 }

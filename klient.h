@@ -7,3 +7,7 @@
 
 #endif //POS_ZAPOCET_2_KLIENT_H
 
+int registracia(char buffer[], int sockfd, int n);
+int prihlasenie(char buffer[], int sockfd, int n);
+int chatovanie(char buffer[], int sockfd, int n);
+

@@ -44,3 +44,34 @@ int registracia(char* login, char* heslo, char* potvrdHeslo) {
         return 0;
     }
 }
+
+int prihlasenie(char* login, char* heslo) {
+    FILE *subor;
+    subor = fopen("zaregistrovani_pouzivatelia.txt", "r");
+    int foundLogin = 0;
+    char buff[512];
+    char loginFile[30];
+    char hesloFile[30];
+    while (fscanf(subor, " %s %s", loginFile, hesloFile) == 2) {
+        if ((strcmp(loginFile, login) == 0) && strcmp(hesloFile, heslo) == 0) {
+            foundLogin = 1;
+            break;
+        }
+    }
+
+    if(foundLogin == 1) {
+        printf("\n\033[32;1mSERVER: Uzivatel  %s sa prihlasil\033[0m\n", loginFile);
+        return 1;
+    } else {
+        printf("\n\033[32;1mSERVER: Nespravne meno alebo heslo\033[0m\n");
+        return 0;
+    }
+
+}
+
+
+int spracovanieRegistracie(int newsockfd, int n);
+
+int spracovaniePrihlasenia(int newsockfd, int n);
+
+int spracovanieChatovania(int newsockfd, int n);

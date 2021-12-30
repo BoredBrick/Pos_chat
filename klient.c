@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     }
 
     int bolExit = 0;
-    char* exit = "exit\n";
+    char* exit = "exit";
     int bolaRegistracia = 0;
 
     while(bolExit == 0) {
@@ -65,74 +65,22 @@ int main(int argc, char *argv[])
 
         puts("\033[36;1m|--- CHAT APP ---|\033[0m");
         puts("[1] Registracia");
-        puts("[2] Chatovanie");
+        puts("[2] Prihlasenie");
+        puts("[3] Chatovanie");
         puts("[0] Koniec");
         printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
         scanf("%d", &akcia);
         getchar();
 
         if (akcia == 1) {
-            while (bolaRegistracia == 0) {
-                char login[30], heslo[30];
-                bzero(buffer, 256);
-                printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-                scanf("%s", &login);
-                getchar();
-                printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
-                scanf("%s", &heslo);
-                getchar();
-                //memset()
-                strcat(buffer, login);
-                strcat(buffer, " ");
-                strcat(buffer, heslo);
-                printf("%s", buffer);
-
-
-                //gets(buffer, 255, stdin);
-
-                buffer[strcspn(buffer, "\n")] = 0;
-
-                bolaRegistracia = 1;
-                n = write(sockfd, buffer, strlen(buffer));
-                if (n < 0) {
-                    perror("Error writing to socket");
-                    return 5;
-                }
-
-                bzero(buffer, 256);
-                n = read(sockfd, buffer, 255);
-                if (n < 0) {
-                    perror("Error reading from socket");
-                    return 6;
-                }
-                printf("%s\n", buffer);
-            }
+            registracia(buffer, sockfd, n);
         } else if (akcia == 2) {
-            printf("\n\033[35;1mKLIENT: Prosim, zadajte spravu: \033[0m");
-            bzero(buffer, 256);
-            fgets(buffer, 255, stdin);
-
-            n = write(sockfd, buffer, strlen(buffer));
-            if (n < 0) {
-                perror("Error writing to socket");
-                return 5;
-            }
-
-            if (strcmp(buffer, exit) == 0) {
-                bolExit = 1;
-            }
-
-            bzero(buffer, 256);
-            n = read(sockfd, buffer, 255);
-            if (n < 0) {
-                perror("Error reading from socket");
-                return 6;
-            }
-
-            printf("%s\n", buffer);
+            prihlasenie(buffer, sockfd, n);
+        } else if (akcia == 3) {
+            chatovanie(buffer, sockfd, n);
         } else if (akcia == 0) {
             bolExit = 1;
-            n = write(sockfd, "exit\n", strlen("exit\n"));
+            n = write(sockfd, "exit", strlen("exit"));
             if (n < 0) {
                 perror("Error writing to socket");
                 return 5;

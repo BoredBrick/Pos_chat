@@ -58,60 +58,31 @@ int main(int argc, char *argv[])
     }
 
     int bolExit = 0;
-    char* exit = "exit\n";
-    int i = 0;
-    while(bolExit == 0) {
-
-        if (i < 1) {
-            bzero(buffer, 256);
-            n = read(newsockfd, buffer, 255);
-            if (n < 0) {
-                perror("Error reading from socket");
-                return 4;
-            }
-
-            // TODO: Split strings from buffer registracia (strtok)
-
-            if (registracia(buffer, "heslo", "heslo")) {
-                const char *msg = "\n\033[32;1mSERVER: Boli ste uspesne zaregistrovany.\033[0m\n";
-                n = write(newsockfd, msg, strlen(msg) + 1);
-                if (n < 0) {
-                    perror("Error writing to socket");
-                    return 5;
-                }
-            } else {
-                const char *msg = "\n\033[32;1mSERVER: Neboli ste zaregistrovany. Zadany login uz existuje.\033[0m\n";
-                n = write(newsockfd, msg, strlen(msg) + 1);
-                if (n < 0) {
-                    perror("Error writing to socket");
-                    return 5;
-                }
-            }
-
-        }
-
-        i++;
-
+    while (bolExit == 0) {
         bzero(buffer, 256);
         n = read(newsockfd, buffer, 255);
+        //citanie buffra co prisiel na socket
         if (n < 0) {
             perror("Error reading from socket");
             return 4;
         }
-        printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s", buffer);
+        char *typSpravy;
+        typSpravy = strtok(buffer, " ");
 
-        if (strcmp(buffer, exit) == 0) {
+        if (strcmp(typSpravy, "registracia") == 0) {
+            int res = spracovanieRegistracie(newsockfd, n);
+
+        } else if (strcmp(typSpravy, "prihlasenie") == 0) {
+            int res = spracovaniePrihlasenia(newsockfd, n);
+
+        } else if (strcmp(typSpravy, "chatovanie") == 0) {
+            int res = spracovanieChatovania(newsockfd, n);
+
+        } else if (strcmp(typSpravy, "exit") == 0) {
             bolExit = 1;
-        }
 
-        const char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
-        n = write(newsockfd, msg, strlen(msg) + 1);
-        if (n < 0) {
-            perror("Error writing to socket");
-            return 5;
         }
     }
-
     close(newsockfd);
     close(sockfd);
 

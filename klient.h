@@ -11,3 +11,5 @@ int registracia(char buffer[], int sockfd, int n);
 int prihlasenie(char buffer[], int sockfd, int n);
 int chatovanie(char buffer[], int sockfd, int n);
 
+int uvodnaObrazovka(char buffer[], int sockfd, int n);
+int hlavnaPonuka(char buffer[], int sockfd, int n);

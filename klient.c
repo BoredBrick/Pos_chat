@@ -61,33 +61,23 @@ int main(int argc, char *argv[])
     char* exit = "exit";
     int bolaRegistracia = 0;
 
-    while(bolExit == 0) {
-        int akcia = 1;
 
-        puts("\033[36;1m|--- CHAT APP ---|\033[0m");
-        puts("[1] Registracia");
-        puts("[2] Prihlasenie");
-        puts("[3] Chatovanie");
-        puts("[0] Koniec");
-        printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
-        scanf("%d", &akcia);
-        getchar();
-
-        if (akcia == 1) {
-            registracia(buffer, sockfd, n);
-        } else if (akcia == 2) {
-            prihlasenie(buffer, sockfd, n);
-        } else if (akcia == 3) {
-            chatovanie(buffer, sockfd, n);
-        } else if (akcia == 0) {
-            bolExit = 1;
-            n = write(sockfd, "exit", strlen("exit"));
-            if (n < 0) {
-                perror("Error writing to socket");
-                return 5;
+    int resultUvodna = -1;
+    int resultHlavna = -1;
+    while(resultUvodna != 0 ) {
+        if(resultHlavna == 0) {
+            break;
+        }
+        resultUvodna = uvodnaObrazovka(buffer,sockfd,n);
+        //koniec vrati 0, odhlasenie vrati 2
+        while(resultHlavna != 2) {
+            resultHlavna = hlavnaPonuka(buffer,sockfd,n);
+            if(resultHlavna == 0) {
+                break;
             }
         }
     }
+
 
     close(sockfd);
 
@@ -205,3 +195,63 @@ int chatovanie(char buffer[], int sockfd, int n) {
     return 0;
 }
 
+int uvodnaObrazovka(char buffer[], int sockfd, int n) {
+    int uspesnyLogin = 0;
+    while (uspesnyLogin == 0) {
+        int akcia = 0;
+        puts("\033[36;1m|--- CHAT APP ---|\033[0m");
+        puts("[1] Registracia");
+        puts("[2] Prihlasenie");
+        puts("[0] Koniec");
+        printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
+        scanf("%d", &akcia);
+        getchar();
+        if (akcia == 1) {
+            if (registracia(buffer, sockfd, n) == 1) {
+                uspesnyLogin = 1;
+            }
+        } else if (akcia == 2) {
+            if (prihlasenie(buffer, sockfd, n) == 1) {
+                uspesnyLogin = 1;
+            }
+        } else if (akcia == 0) {
+            n = write(sockfd, "exit", strlen("exit"));
+            if (n < 0) {
+                perror("Error writing to socket");
+                return 5;
+            }
+            return 0;
+        } else {
+            printf("\n\033[35;1mKLIENT: Nespravne zvolena akcia!\033[0m");
+        }
+    }
+    return 0;
+}
+
+int hlavnaPonuka(char buffer[], int sockfd, int n) {
+    int bolExit = 0;
+    while(bolExit == 0) {
+
+        int akcia = 0;
+        puts("[1] Chatovanie");
+        puts("[2] Odhlasenie");
+        puts("[0] Koniec");
+        printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
+        scanf("%d", &akcia);
+        getchar();
+
+        if (akcia == 1) {
+            chatovanie(buffer,sockfd,n);
+        } else if (akcia == 0) {
+            bolExit = 1;
+            n = write(sockfd, "exit", strlen("exit"));
+            if (n < 0) {
+                perror("Error writing to socket");
+                return 5;
+            }
+            return 0;
+        } else if(akcia == 2) {
+           return 2;
+        }
+    }
+}

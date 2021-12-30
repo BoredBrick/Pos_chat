@@ -14,8 +14,71 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-int main(int argc, char *argv[])
-{
+// volatile sig_atomic_t flag = 0;
+// int sockfd = 0;
+// char name[NAME_LENGTH];
+
+/* void str_overwrite_stdout() {
+    *      printf("\r%s", "> ");
+    *      fflush(stdout);
+    * }
+*
+* void str_trim_lf(char* arr, int length) {
+    *      for (int i=0; i<length; i++) {
+        *          if (arr[i] == '\n') {
+            *              arr[i] = '\0';
+            *              break;
+            *          }
+        *      }
+    * }
+*/
+
+/*
+ * void catch_ctrl_c_and_exit() {
+ *      flag = 1;
+ * }
+ */
+
+/*
+ * void recv_msg_handler() {
+ *      char message[BUFFER_SIZE] = {};
+ *      while (1) {
+ *          int receive = recv(sockfd, message, BUFFER_SIZE, 0);
+ *
+ *          if (receive > 0) {
+ *              printf("%s ", message);
+ *              str_overwrite_stdout();
+ *          } else if (receive == 0) {
+ *              break;
+ *          }
+ *          bzero(message, BUFFER_SIZE);
+ *      }
+ * }
+ *
+ * void send_msg_handler() {
+ *      char buffer[BUFFER_SIZE] = {};
+ *      char message[BUFFER_SIZE + NAME_LENGTH] = {};
+ *
+ *      while (1) {
+ *          str_overwrite_stdout();
+ *          fgets(buffer, BUFFER_SIZE, stdin);
+ *          str_trim_lf(buffer, BUFFER_SIZE);
+ *
+ *          if (strcmp(buffer, "exit") == 0) {
+ *              break;
+ *          } else {
+ *              sprintf(message, "%s: %s\n", name, buffer);
+ *              send(sockfd, message, strlen(message), 0);
+ *          }
+ *
+ *          bzero(buffer, BUFFER_SIZE);
+ *          bzero(message, BUFFER_SIZE + NAME_LENGTH)
+ *      }
+ *      catch_ctrl_c_and_exit(2);
+ * }
+ */
+
+int main(int argc, char *argv[]) {
     setlinebuf(stdout);
     int sockfd, n;
     struct sockaddr_in serv_addr;
@@ -33,7 +96,8 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    bzero((char*)&serv_addr, sizeof(serv_addr));
+    // SOCKET SETTINGS
+    bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     bcopy(
             (char *) server->h_addr,
@@ -48,11 +112,53 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    if(connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
-    {
+    // signal(SIGINT, catch_ctrl_c_and_exit);
+    /*
+     * // REGISTRACIA
+     * printf("Enter your name");
+     * fgets(name, NAME_LENGTH, stdin);
+     * str_trim_lf(name, strlen(name));
+     *
+     * if (strlen(name) > NAME_LENGTH - 1 || strlen(name) < 2) {
+     *      printf("Enter name correctly.\n");
+     *      return EXIT_FAILURE;
+     * }
+     */
+
+    // CONNECT TO THE SERVER
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         perror("Error connecting to socket");
         return 4;
     }
+
+    /*
+     * SEND THE NAME
+     * send(sockfd, name, NAME_LEN, 0);
+     *
+     * pthread_t send_ms_thread;
+     * if (pthread_create(&send_msg_thread, NULL, (void*)send_msg_handler, NULL) != 0) {
+     *      printf("ERROR: pthread\n");
+     *      return EXIT_FAILURE;
+     * }
+     *
+     * pthread_t recv_ms_thread;
+     * if (pthread_create(&recv_msg_thread, NULL, (void*)recv_msg_handler, NULL) != 0) {
+     *      printf("ERROR: pthread\n");
+     *      return EXIT_FAILURE;
+     * }
+     *
+     * while (1) {
+     *      if (flag) {
+     *          printf("\nBye\n");
+     *          break;
+     *      }
+     * }
+     *
+     * close(sockfd);
+     *
+     * return EXIT_SUCCESS;
+     *
+     */
 
     int bolExit = 0;
     char *exit = "exit";

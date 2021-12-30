@@ -45,41 +45,39 @@ int main(int argc, char *argv[]) {
     printf("\033[32;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
     listen(sockfd, 5);
 
-    //nadviazeme spojenie s jednym klientskym socketom
-    cli_len = sizeof(cli_addr);
-    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
-    if (newsockfd < 0) {
-        perror("ERROR on accept");
-        return 3;
+
+    while (1) {
+        cli_len = sizeof(cli_addr);
+        // CONNECTION TO CLIENT
+        newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
+        if (newsockfd < 0) {
+            perror("ERROR on accept");
+            return 3;
+        }
+        /*      // CHECK FOR MAX_CLIENTS
+         *      if ((cli_count + 1) == MAX_CLIENTS) {
+         *          printf("Maximum clients connected. Connection rejected.\n");
+         *          print_ip_addr(cli_addr);
+         *          close(newsockfd);
+         *          continue;
+         *      }
+         */
+        // CLIENT SETTINGS
+        client_t *cli = (client_t *) malloc(sizeof(client_t));
+        cli->address = cli_addr;
+        cli->sockfd = newsockfd;
+        cli->uid = cli->uid++;
+
+        // ADD CLIENT TO QUEUE
+        queue_add(cli);
+        pthread_create(&vlakno, NULL, &handle_client, (void *) cli);
+
+        // REDUCE CPU USAGE
+        sleep(1);
+
     }
 
-    int bolExit = 0;
-    while (bolExit == 0) {
-        bzero(buffer, 256);
-        n = read(newsockfd, buffer, 255);
-        //citanie buffra co prisiel na socket
-        if (n < 0) {
-            perror("Error reading from socket");
-            return 4;
-        }
-        char *typSpravy;
-        typSpravy = strtok(buffer, " ");
 
-        if (strcmp(typSpravy, "registracia") == 0) {
-            int res = spracovanieRegistracie(newsockfd, n);
-
-        } else if (strcmp(typSpravy, "prihlasenie") == 0) {
-            int res = spracovaniePrihlasenia(newsockfd, n);
-
-        } else if (strcmp(typSpravy, "chatovanie") == 0) {
-            int res = spracovanieChatovania(newsockfd, n);
-
-        } else if (strcmp(typSpravy, "exit") == 0) {
-            bolExit = 1;
-
-        }
-    }
-    close(newsockfd);
     close(sockfd);
 
     return 0;

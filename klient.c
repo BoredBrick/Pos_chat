@@ -19,18 +19,16 @@ int main(int argc, char *argv[])
     setlinebuf(stdout);
     int sockfd, n;
     struct sockaddr_in serv_addr;
-    struct hostent* server;
+    struct hostent *server;
     char buffer[256];
 
-    if (argc < 3)
-    {
-        fprintf(stderr,"usage %s hostname port\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "usage %s hostname port\n", argv[0]);
         return 1;
     }
 
     server = gethostbyname(argv[1]);
-    if (server == NULL)
-    {
+    if (server == NULL) {
         fprintf(stderr, "Error, no such host\n");
         return 2;
     }
@@ -38,15 +36,14 @@ int main(int argc, char *argv[])
     bzero((char*)&serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     bcopy(
-            (char*)server->h_addr,
-            (char*)&serv_addr.sin_addr.s_addr,
+            (char *) server->h_addr,
+            (char *) &serv_addr.sin_addr.s_addr,
             server->h_length
     );
     serv_addr.sin_port = htons(atoi(argv[2]));
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-    {
+    if (sockfd < 0) {
         perror("Error creating socket");
         return 3;
     }
@@ -58,21 +55,21 @@ int main(int argc, char *argv[])
     }
 
     int bolExit = 0;
-    char* exit = "exit";
+    char *exit = "exit";
     int bolaRegistracia = 0;
 
 
     int resultUvodna = -1;
     int resultHlavna = -1;
-    while(resultUvodna != 0 ) {
-        if(resultHlavna == 0) {
+    while (resultUvodna != 0) {
+        if (resultHlavna == 0) {
             break;
         }
-        resultUvodna = uvodnaObrazovka(buffer,sockfd,n);
+        resultUvodna = uvodnaObrazovka(buffer, sockfd, n);
         //koniec vrati 0, odhlasenie vrati 2
-        while(resultHlavna != 2) {
-            resultHlavna = hlavnaPonuka(buffer,sockfd,n);
-            if(resultHlavna == 0) {
+        while (resultHlavna != 2) {
+            resultHlavna = hlavnaPonuka(buffer, sockfd, n);
+            if (resultHlavna == 0) {
                 break;
             }
         }
@@ -127,8 +124,8 @@ int registracia(char buffer[], int sockfd, int n) {
     }
     printf("%s\n", buffer);
 
-    char* uspech;
-    char* zaciatokNaZahodenie;
+    char *uspech;
+    char *zaciatokNaZahodenie;
 
     zaciatokNaZahodenie = strtok(buffer, " ");
     uspech = strtok(NULL, " ");
@@ -177,8 +174,8 @@ int prihlasenie(char buffer[], int sockfd, int n) {
     }
     printf("%s\n", buffer);
 
-    char* uspech;
-    char* zaciatokNaZahodenie;
+    char *uspech;
+    char *zaciatokNaZahodenie;
 
     zaciatokNaZahodenie = strtok(buffer, " ");
     uspech = strtok(NULL, " ");
@@ -256,7 +253,7 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
 
 int hlavnaPonuka(char buffer[], int sockfd, int n) {
     int bolExit = 0;
-    while(bolExit == 0) {
+    while (bolExit == 0) {
 
         int akcia = 0;
         puts("[1] Chatovanie");
@@ -267,7 +264,7 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
         getchar();
 
         if (akcia == 1) {
-            chatovanie(buffer,sockfd,n);
+            chatovanie(buffer, sockfd, n);
         } else if (akcia == 0) {
             bolExit = 1;
             n = write(sockfd, "exit", strlen("exit"));
@@ -276,8 +273,8 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
                 return 5;
             }
             return 0;
-        } else if(akcia == 2) {
-           return 2;
+        } else if (akcia == 2) {
+            return 2;
         }
     }
 }

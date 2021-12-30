@@ -10,7 +10,7 @@
 
 #endif //POS_ZAPOCET_2_SERVER_H
 
-int registracia(char* login, char* heslo, char* potvrdHeslo) {
+int registracia(char *login, char *heslo, char *potvrdHeslo) {
 
     FILE *subor;
     subor = fopen("zaregistrovani_pouzivatelia.txt", "a+");
@@ -45,7 +45,7 @@ int registracia(char* login, char* heslo, char* potvrdHeslo) {
     }
 }
 
-int prihlasenie(char* login, char* heslo) {
+int prihlasenie(char *login, char *heslo) {
     FILE *subor;
     subor = fopen("zaregistrovani_pouzivatelia.txt", "r");
     int foundLogin = 0;
@@ -59,7 +59,7 @@ int prihlasenie(char* login, char* heslo) {
         }
     }
 
-    if(foundLogin == 1) {
+    if (foundLogin == 1) {
         printf("\n\033[32;1mSERVER: Uzivatel  %s sa prihlasil\033[0m\n", loginFile);
         return 1;
     } else {

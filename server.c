@@ -99,14 +99,14 @@ int spracovaniePrihlasenia(int newsockfd, int n) {
     printf("VYSLEDOK PRIHLASENIA: %d\n", log);
 
     if (log == 1) {
-        const char *msg = "\n\033[32;1mSERVER: Boli ste uspesne prihlaseny.\033[0m\n";
+        const char *msg = "\n\033[32;1mSERVER: Uspesne prihlasenie.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");
             return 5;
         }
     } else {
-        const char *msg = "\n\033[32;1mSERVER: Neboli ste prihlaseny. Nespravne meno alebo heslo.\033[0m\n";
+        const char *msg = "\n\033[32;1mSERVER: Neuspesne prihlasenie. Nespravne meno alebo heslo.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");
@@ -133,21 +133,21 @@ int spracovanieRegistracie(int newsockfd, int n) {
     printf("VYSLEDOK REGISTRACIE: %d\n", reg);
 
     if (reg == 1) {
-        const char *msg = "\n\033[32;1mSERVER: Boli ste uspesne zaregistrovany.\033[0m\n";
+        const char *msg = "\n\033[32;1mSERVER: Uspesna registracia.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");
             return 5;
         }
     } else if (reg == 0) {
-        const char *msg = "\n\033[32;1mSERVER: Neboli ste zaregistrovany. Zadany login uz existuje.\033[0m\n";
+        const char *msg = "\n\033[32;1mSERVER: Neuspesna registracia. Zadany login uz existuje.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");
             return 5;
         }
     } else {
-        const char *msg = "\n\033[32;1mSERVER: Neboli ste zaregistrovany. Hesla sa nezhoduju.\033[0m\n";
+        const char *msg = "\n\033[32;1mSERVER: Neuspesna registracia. Hesla sa nezhoduju.\033[0m\n";
         n = write(newsockfd, msg, strlen(msg) + 1);
         if (n < 0) {
             perror("Error writing to socket");

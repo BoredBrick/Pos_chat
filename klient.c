@@ -116,6 +116,8 @@ int registracia(char buffer[], int sockfd, int n) {
         return 5;
     }
 
+    int vysledok = 0;
+
     // Odpoved zo servera
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
@@ -124,6 +126,18 @@ int registracia(char buffer[], int sockfd, int n) {
         return 6;
     }
     printf("%s\n", buffer);
+
+    char* uspech;
+    char* zaciatokNaZahodenie;
+
+    zaciatokNaZahodenie = strtok(buffer, " ");
+    uspech = strtok(NULL, " ");
+
+    if (strcmp(uspech, "Uspesna") == 0) {
+        vysledok = 1;
+    }
+
+    return vysledok;
 }
 
 int prihlasenie(char buffer[], int sockfd, int n) {
@@ -153,6 +167,7 @@ int prihlasenie(char buffer[], int sockfd, int n) {
         return 5;
     }
 
+    int vysledok = 0;
     // Odpoved zo servera
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
@@ -161,7 +176,18 @@ int prihlasenie(char buffer[], int sockfd, int n) {
         return 6;
     }
     printf("%s\n", buffer);
-    return 0;
+
+    char* uspech;
+    char* zaciatokNaZahodenie;
+
+    zaciatokNaZahodenie = strtok(buffer, " ");
+    uspech = strtok(NULL, " ");
+
+    if (strcmp(uspech, "Uspesne") == 0) {
+        vysledok = 1;
+    }
+
+    return vysledok;
 }
 
 int chatovanie(char buffer[], int sockfd, int n) {

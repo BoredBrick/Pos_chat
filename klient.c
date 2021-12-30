@@ -160,6 +160,7 @@ int main(int argc, char *argv[]) {
      *
      */
 
+
     int bolExit = 0;
     char *exit = "exit";
     int bolaRegistracia = 0;
@@ -354,7 +355,7 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
             printf("\n\033[35;1mKLIENT: Nespravne zvolena akcia!\033[0m");
         }
     }
-    return 0;
+    return -1;
 }
 
 int hlavnaPonuka(char buffer[], int sockfd, int n) {
@@ -383,4 +384,5 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
             return 2;
         }
     }
+    return -1;
 }

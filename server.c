@@ -19,7 +19,7 @@
 #define MAX_CLIENTS 10
 
 static _Atomic unsigned int cli_count = 0;
-// static int uid = 10;
+static int uid = 10;
 
 // CLIENT STRUCTURE
 
@@ -85,25 +85,22 @@ void queue_remove(int uid) {
  *          (addr.sin_addr.s_addr & 0xff0000) >> 16,
  *          (addr.sin_addr.s_addr & 0xff000000) >> 24);
  * }
- *
- * // (send message to all clients except me)
- * void send_message(char *s, int uid) {
- *      pthread_mutex_lock(&clients_mutex);
- *      for (int i = 0; i < MAX_CLIENTS; i++) {
- *          if (clients[i]) {
- *              if (clients[i]->uid != uid) {
- *                  if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
- *                      printf("ERROR: write to descriptor failed\n");
- *                      break;
- *                  }
- *              }
- *          }
- *      }
- *      pthread_mutex_unlock(&clients_mutex);
- * }
- *
  */
-
+// (send message to all clients except me)
+void send_message(char *s, int uid) {
+    pthread_mutex_lock(&clients_mutex);
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (clients[i]) {
+            if (clients[i]->uid != uid) {
+                if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
+                    printf("ERROR: write to descriptor failed\n");
+                    break;
+                }
+            }
+        }
+    }
+    pthread_mutex_unlock(&clients_mutex);
+}
 
 
 void *handle_client(void *arg) {
@@ -116,9 +113,6 @@ void *handle_client(void *arg) {
     client_t *cli = (client_t *) arg;
     /*
     *      // RECEIVING NAME FROM THE CLIENT
-    *      if (recv(cli->sockfd, name, NAME_LENGTH, 0) <= 0 || strlen(name) < 2 || strlen(name) >= NAME_LENGTH - 1) {
-    *          printf(Enter the name correctly.\n);
-    *          leave_flag = 1;
     *      } else {
     *          // CLIENT IS JOINING THE SERVER
     *          strcpy(cli->name, name);
@@ -153,12 +147,6 @@ void *handle_client(void *arg) {
     *          }
     *           bzero(buffer, BUFFER_SIZE);
     *      }
-    *      // CLIENT LEFT
-    *      close(cli->sockfd);
-    *      queue_remove(cli->uid);
-    *      free(cli);
-    *      cli_count--;
-    *      pthread_detach(pthread_self());
     */
 
     int bolExit = 0;
@@ -185,8 +173,21 @@ void *handle_client(void *arg) {
         } else if (strcmp(typSpravy, "chatovanie") == 0) {
             int res = spracovanieChatovania(newsockfd, n);
 
+        } else if (strcmp(typSpravy, "zrusenie") == 0) {
+            int res = spracovanieZruseniaUctu(newsockfd, n);
+
         } else if (strcmp(typSpravy, "exit") == 0) {
             bolExit = 1;
+
+        } else if (strcmp(typSpravy, "nickname") == 0) {
+            // int res =
+            char* meno;
+            meno = strtok(NULL, "/0");
+
+            //strcpy(cli->name, meno);
+            //sprintf(buffer, "\n%s has joined\n", cli->name);
+            //printf("%s", buffer);
+            //send_message(buffer, cli->uid);
 
         }
     }
@@ -365,6 +366,38 @@ int spracovanieChatovania(int newsockfd, int n) {
         perror("Error writing to socket");
         return 5;
     }
+}
+
+int spracovanieZruseniaUctu(int newsockfd, int n) {
+    char *login;
+    char *heslo;
+
+    login = strtok(NULL, " ");
+    heslo = strtok(NULL, "/0");
+
+    printf("LOGIN: %s\n", login);
+    printf("HESLO: %s\n", heslo);
+
+    int del = zrusenieUctu(login, heslo);
+
+    printf("VYSLEDOK ZRUSENIA UCTU: %d\n", del);
+
+    if (del == 1) {
+        const char *msg = "\n\033[32;1mSERVER: Uspesne zrusenie uctu.\033[0m\n";
+        n = write(newsockfd, msg, strlen(msg) + 1);
+        if (n < 0) {
+            perror("Error writing to socket");
+            return 5;
+        }
+    } else {
+        const char *msg = "\n\033[32;1mSERVER: Neuspesne zrusenie uctu. Nespravne meno alebo heslo.\033[0m\n";
+        n = write(newsockfd, msg, strlen(msg) + 1);
+        if (n < 0) {
+            perror("Error writing to socket");
+            return 5;
+        }
+    }
+    return 0;
 }
 
 

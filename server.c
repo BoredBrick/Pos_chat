@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
         client_t *cli = (client_t *) malloc(sizeof(client_t));
         cli->address = cli_addr;
         cli->sockfd = newsockfd;
-        cli->uid = cli->uid++;
+        cli->uid = uid++;
 
         // ADD CLIENT TO QUEUE
         queue_add(cli);

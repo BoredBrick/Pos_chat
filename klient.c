@@ -309,7 +309,7 @@ int prihlasenie(char buffer[], int sockfd, int n) {
     return vysledok;
 }
 
-int chatovanie(char buffer[], int sockfd, int n) {
+int chatovanie(char buffer[], int sockfd) {
     char sprava[30];
     while (strcmp(sprava, "exit") != 0) {
         printf("\n\033[35;1mKLIENT: Prosim, zadajte spravu: \033[0m");
@@ -323,7 +323,7 @@ int chatovanie(char buffer[], int sockfd, int n) {
 
         buffer[strcspn(buffer, "\n")] = 0;
 
-        n = write(sockfd, buffer, strlen(buffer));
+        int n = write(sockfd, buffer, strlen(buffer));
         if (n < 0) {
             perror("Error writing to socket");
             return 5;

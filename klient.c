@@ -143,6 +143,19 @@ int main(int argc, char *argv[]) {
         return 4;
     }
 
+
+//    if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
+//        printf("ERROR: pthread\n");
+//        return EXIT_FAILURE;
+//    }
+//
+//    if (pthread_create(&recv_msg_thread, NULL, (void *) recv_msg_handler, NULL) != 0) {
+//        printf("ERROR: pthread\n");
+//        return EXIT_FAILURE;
+//    }
+//
+//    n = write(sockfd, "jozko", NAME_LENGTH);
+
     // REGISTRACIA
     int resultUvodna = -1;
     int resultHlavna = -1;
@@ -151,25 +164,29 @@ int main(int argc, char *argv[]) {
             break;
         }
         resultUvodna = uvodnaObrazovka(buffer, sockfd, n);
-        if (resultUvodna != 0) {
-            /*if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
-                printf("ERROR: pthread\n");
-                return EXIT_FAILURE;
-            }*/
-
-            /*if (pthread_create(&recv_msg_thread, NULL, (void *) recv_msg_handler, NULL) != 0) {
-                printf("ERROR: pthread\n");
-                return EXIT_FAILURE;
-            }*/
-
-            int n = write(sockfd, name, NAME_LENGTH);
-        }
-        //koniec vrati 0, odhlasenie vrati 2
-        while (resultHlavna != 2) {
-            resultHlavna = hlavnaPonuka(buffer, sockfd, n);
-            if (resultHlavna == 0) {
-                break;
+//        if (resultUvodna != 0) {
+//            /*if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
+//                printf("ERROR: pthread\n");
+//                return EXIT_FAILURE;
+//            }*/
+//
+//            /*if (pthread_create(&recv_msg_thread, NULL, (void *) recv_msg_handler, NULL) != 0) {
+//                printf("ERROR: pthread\n");
+//                return EXIT_FAILURE;
+//            }*/
+//
+//            int n = write(sockfd, name, NAME_LENGTH);
+//        }
+        if (resultUvodna == 1) {
+            //koniec vrati 0, odhlasenie vrati 2
+            while (resultHlavna != 2) {
+                resultHlavna = hlavnaPonuka(buffer, sockfd, n);
+                if (resultHlavna == 0) {
+                    break;
+                }
             }
+        } else {
+            continue;
         }
     }
 

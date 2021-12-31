@@ -184,10 +184,10 @@ void *handle_client(void *arg) {
             char* meno;
             meno = strtok(NULL, "/0");
 
-            //strcpy(cli->name, meno);
-            //sprintf(buffer, "\n%s has joined\n", cli->name);
-            //printf("%s", buffer);
-            //send_message(buffer, cli->uid);
+//            strcpy(cli->name, meno);
+//            sprintf(buffer, "\n%s has joined\n", cli->name);
+//            printf("%s", buffer);
+//            send_message(buffer, cli->uid);
 
         }
     }

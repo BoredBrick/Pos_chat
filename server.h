@@ -31,7 +31,7 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
             fprintf(subor, heslo);
             fprintf(subor, "\n");
             fclose(subor);
-            printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela.\033[0m\n");
+            printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela %s.\033[0m\n", login);
             return 1;
         } else {
             // Zadane heslo a potvrdene heslo sa nezhoduju
@@ -51,7 +51,6 @@ int prihlasenie(char *login, char *heslo) {
     FILE *subor;
     subor = fopen("zaregistrovani_pouzivatelia.txt", "r");
     int foundLogin = 0;
-    char buff[512];
     char loginFile[30];
     char hesloFile[30];
     while (fscanf(subor, " %s %s", loginFile, hesloFile) == 2) {
@@ -77,7 +76,6 @@ int zrusenieUctu(char* login, char* heslo) {
     subor = fopen("zaregistrovani_pouzivatelia.txt", "a+");
 
     int foundLogin = 0;
-    char buff[512];
     char loginFile[30];
     char hesloFile[30];
     while (fscanf(subor, " %s %s", loginFile, hesloFile) == 2) {
@@ -117,10 +115,15 @@ int zrusenieUctu(char* login, char* heslo) {
         return 0;
     }
 }
-int spracovanieRegistracie(int newsockfd, int n);
 
-int spracovaniePrihlasenia(int newsockfd, int n);
+void spracovanieRegistracie(int newsockfd, int n);
 
-int spracovanieChatovania(int newsockfd, int n);
+void spracovaniePrihlasenia(int newsockfd, int n);
 
-int spracovanieZruseniaUctu(int newsockfd, int n);
+void spracovanieChatovania(int newsockfd, int n);
+
+void spracovanieZruseniaUctu(int newsockfd, int n);
+
+void writeToClient(char buffer[], int sockfd);
+
+void listenToClient(char buffer[], int sockfd);

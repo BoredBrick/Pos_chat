@@ -3,7 +3,6 @@
 //
 
 #include "klient.h"
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,8 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <pthread.h>
 
 #define BUFFER_SIZE 256
 #define NAME_LENGTH 30
@@ -21,29 +18,6 @@
 // volatile sig_atomic_t flag = 0;
 int sockfd = 0;
 char name[NAME_LENGTH];
-
-/* void str_overwrite_stdout() {
-    *      printf("\r%s", "> ");
-    *      fflush(stdout);
-    * }
-*
-* void str_trim_lf(char* arr, int length) {
-    *      for (int i=0; i<length; i++) {
-        *          if (arr[i] == '\n') {
-            *              arr[i] = '\0';
-            *              break;
-            *          }
-        *      }
-    * }
-*/
-
-/*
- * void catch_ctrl_c_and_exit() {
- *      flag = 1;
- * }
- */
-
-
 
 
 void recv_msg_handler() { //
@@ -124,19 +98,6 @@ int main(int argc, char *argv[]) {
         return 3;
     }
 
-    // signal(SIGINT, catch_ctrl_c_and_exit);
-    /*
-     * // REGISTRACIA
-     * printf("Enter your name");
-     * fgets(name, NAME_LENGTH, stdin);
-     * str_trim_lf(name, strlen(name));
-     *
-     * if (strlen(name) > NAME_LENGTH - 1 || strlen(name) < 2) {
-     *      printf("Enter name correctly.\n");
-     *      return EXIT_FAILURE;
-     * }
-     */
-
     // CONNECT TO THE SERVER
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         perror("Error connecting to socket");
@@ -190,25 +151,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /*
-     * SEND THE NAME
-     * send(sockfd, name, NAME_LEN, 0);
-     *
-
-     *
-     * while (1) {
-     *      if (flag) {
-     *          printf("\nBye\n");
-     *          break;
-     *      }
-     * }
-     *
-     * close(sockfd);
-     *
-     * return EXIT_SUCCESS;
-     *
-     */
-
     close(sockfd);
 
     return 0;
@@ -235,34 +177,23 @@ int registracia(char buffer[], int sockfd, int n) {
     strcat(buffer, heslo);
     strcat(buffer, " ");
     strcat(buffer, potvrdeneHeslo);
-    printf("%s", buffer);
 
     buffer[strcspn(buffer, "\n")] = 0;
 
     // Poslanie udajov serveru
-    n = write(sockfd, buffer, strlen(buffer));
-    if (n < 0) {
-        perror("Error writing to socket");
-        return 5;
-    }
+    writeToServer(buffer, sockfd);
 
     int vysledok = 0;
 
     // Odpoved zo servera
-    bzero(buffer, 256);
-    n = read(sockfd, buffer, 255);
-    if (n < 0) {
-        perror("Error reading from socket");
-        return 6;
-    }
+    listenToServer(buffer, sockfd);
     printf("%s\n", buffer);
 
     char *uspech;
-    char *zaciatokNaZahodenie;
 
-    zaciatokNaZahodenie = strtok(buffer, " ");
+    strtok(buffer, " ");
     uspech = strtok(NULL, " ");
-
+    // ak bola registracia uspesna, uzivatel sa prihlasil a jeho login je poslany na server, ze je aktivny
     if (strcmp(uspech, "Uspesna") == 0) {
         vysledok = 1;
         strcat(name, "nickname");
@@ -289,33 +220,22 @@ int prihlasenie(char buffer[], int sockfd, int n) {
     strcat(buffer, login);
     strcat(buffer, " ");
     strcat(buffer, heslo);
-    printf("%s", buffer);
 
     buffer[strcspn(buffer, "\n")] = 0;
 
     // Poslanie udajov serveru
-    n = write(sockfd, buffer, strlen(buffer));
-    if (n < 0) {
-        perror("Error writing to socket");
-        return 5;
-    }
+    writeToServer(buffer, sockfd);
 
     int vysledok = 0;
     // Odpoved zo servera
-    bzero(buffer, 256);
-    n = read(sockfd, buffer, 255);
-    if (n < 0) {
-        perror("Error reading from socket");
-        return 6;
-    }
+    listenToServer(buffer, sockfd);
     printf("%s\n", buffer);
 
     char *uspech;
-    char *zaciatokNaZahodenie;
-
-    zaciatokNaZahodenie = strtok(buffer, " ");
+    strtok(buffer, " ");
     uspech = strtok(NULL, " ");
 
+    // uzivatel sa prihlasil a jeho login je poslany na server, ze je aktivny
     if (strcmp(uspech, "Uspesne") == 0) {
         vysledok = 1;
         strcat(name, "nickname");
@@ -337,21 +257,12 @@ int chatovanie(char buffer[], int sockfd) {
         strcat(buffer, "chatovanie");
         strcat(buffer, " ");
         strcat(buffer, sprava);
-
         buffer[strcspn(buffer, "\n")] = 0;
 
-        int n = write(sockfd, buffer, strlen(buffer));
-        if (n < 0) {
-            perror("Error writing to socket");
-            return 5;
-        }
-
-        bzero(buffer, 256);
-        n = read(sockfd, buffer, 255);
-        if (n < 0) {
-            perror("Error reading from socket");
-            return 6;
-        }
+        //moja sprava je poslana na server
+        writeToServer(buffer, sockfd);
+        //server odpovie, ze spravu dostal
+        listenToServer(buffer, sockfd);
         printf("%s\n", buffer);
     }
     return 0;
@@ -373,32 +284,21 @@ int zrusenieUctu(char buffer[], int sockfd, int n) {
     strcat(buffer, login);
     strcat(buffer, " ");
     strcat(buffer, heslo);
-    printf("%s", buffer);
 
     buffer[strcspn(buffer, "\n")] = 0;
 
     // Poslanie udajov serveru
-    n = write(sockfd, buffer, strlen(buffer));
-    if (n < 0) {
-        perror("Error writing to socket");
-        return 5;
-    }
+    writeToServer(buffer, sockfd);
 
     int vysledok = 0;
 
     // Odpoved zo servera
-    bzero(buffer, 256);
-    n = read(sockfd, buffer, 255);
-    if (n < 0) {
-        perror("Error reading from socket");
-        return 6;
-    }
+    listenToServer(buffer, sockfd);
     printf("%s\n", buffer);
 
     char *uspech;
-    char *zaciatokNaZahodenie;
 
-    zaciatokNaZahodenie = strtok(buffer, " ");
+    strtok(buffer, " ");
     uspech = strtok(NULL, " ");
 
     if (strcmp(uspech, "Uspesne") == 0) {
@@ -409,8 +309,7 @@ int zrusenieUctu(char buffer[], int sockfd, int n) {
 }
 
 int uvodnaObrazovka(char buffer[], int sockfd, int n) {
-    int uspesnyLogin = 0;
-    while (uspesnyLogin == 0) {
+    while (1) {
         int akcia = 0;
         puts("\033[36;1m|--- CHAT APP ---|\033[0m");
         puts("[1] Registracia");
@@ -422,12 +321,10 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
         getchar();
         if (akcia == 1) {
             if (registracia(buffer, sockfd, n) == 1) {
-                uspesnyLogin = 1;
                 return 1;
             }
         } else if (akcia == 2) {
             if (prihlasenie(buffer, sockfd, n) == 1) {
-                uspesnyLogin = 1;
                 return 1;
             }
         } else if (akcia == 3) {
@@ -448,9 +345,7 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
 }
 
 int hlavnaPonuka(char buffer[], int sockfd, int n) {
-    int bolExit = 0;
-    while (bolExit == 0) {
-
+    while (1) {
         int akcia = 0;
         puts("[1] Chatovanie");
         puts("[2] Odhlasenie");
@@ -462,7 +357,6 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
         if (akcia == 1) {
             chatovanie(buffer, sockfd);
         } else if (akcia == 0) {
-            bolExit = 1;
             n = write(sockfd, "exit", strlen("exit"));
             if (n < 0) {
                 perror("Error writing to socket");
@@ -473,5 +367,21 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
             return 2;
         }
     }
-    return -1;
 }
+
+void writeToServer(char *buffer, int sockfd) {
+    int n = write(sockfd, buffer, strlen(buffer));
+    if (n < 0) {
+        perror("Error writing to socket");
+    }
+}
+
+void listenToServer(char *buffer, int sockfd) {
+    bzero(buffer, 256);
+    int n = read(sockfd, buffer, 255);
+    if (n < 0) {
+        perror("Error reading from socket");
+    }
+}
+
+

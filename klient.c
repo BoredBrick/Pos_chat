@@ -423,13 +423,16 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
         if (akcia == 1) {
             if (registracia(buffer, sockfd, n) == 1) {
                 uspesnyLogin = 1;
+                return 1;
             }
         } else if (akcia == 2) {
             if (prihlasenie(buffer, sockfd, n) == 1) {
                 uspesnyLogin = 1;
+                return 1;
             }
         } else if (akcia == 3) {
             zrusenieUctu(buffer, sockfd, n);
+            return -1;
         } else if (akcia == 0) {
             n = write(sockfd, "exit", strlen("exit"));
             if (n < 0) {

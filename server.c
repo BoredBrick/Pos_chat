@@ -16,14 +16,14 @@
 #define MAX_CLIENTS 10
 
 static _Atomic unsigned int cli_count = 0;
-static int uid = 10;
+static int clientIDstart = 10;
 
 // CLIENT STRUCTURE
 
 typedef struct {
     struct sockaddr_in address;
     int sockfd;
-    int uid;
+    int clientID;
     char name[NAME_LENGTH];
 } client_t;
 client_t *clients[MAX_CLIENTS];
@@ -31,12 +31,12 @@ client_t *clients[MAX_CLIENTS];
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // DOLEZITE AS FUCK No.1 (add Client to queue)
-void queue_add(client_t *cl) {
+void queue_add(client_t *client) {
     pthread_mutex_lock(&clients_mutex);
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (!clients[i]) {
-            clients[i] = cl;
+            clients[i] = client;
             break;
         }
     }
@@ -45,12 +45,12 @@ void queue_add(client_t *cl) {
 }
 
 // DOLEZITE AS FUCK No.2 (remove Client from queue)
-void queue_remove(int uid) {
+void queue_remove(int clientID) {
     pthread_mutex_lock(&clients_mutex);
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i]) {
-            if (clients[i]->uid == uid) {
+            if (clients[i]->clientID == clientID) {
                 clients[i] = NULL;
                 break;
             }
@@ -59,15 +59,16 @@ void queue_remove(int uid) {
     pthread_mutex_unlock(&clients_mutex);
 }
 
-void send_message(char *s, int uid) {
+//posle spravu konkretnemu clientID
+void send_message(char *s, int clientID) {
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i]) {
-            if (clients[i]->uid != uid) {
+            if (clients[i]->clientID == clientID) {
                 if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
                     printf("ERROR: write to descriptor failed\n");
-                    break;
                 }
+                break;
             }
         }
     }
@@ -75,8 +76,8 @@ void send_message(char *s, int uid) {
 }
 
 //funkcia, ktora bude vo vlakne cakat na to, pokial nedostane spravu od klienta, potom ju spracuje
-void *handle_client(void *arg) {
-    printf("I CAN HANDLE THIS!\n");
+void *obsluhaKlienta(void *arg) {
+    printf("Bolo vytvorene vlakno pre klienta!\n");
     char buffer[BUFFER_SIZE];
     cli_count++;
 
@@ -88,7 +89,7 @@ void *handle_client(void *arg) {
     *          strcpy(cli->name, name);
     *          sprintf(buffer, "%s has joined\n", cli->name);
     *          printf("%s", buffer);
-    *          send_message(buffer, cli->uid);
+    *          send_message(buffer, cli->clientID);
     *      }
     *      bzero(buffer, BUFFER_SIZE);
     *
@@ -101,7 +102,7 @@ void *handle_client(void *arg) {
     *
     *          if (receive > 0) {
     *              if (strlen(buffer) > 0) {
-    *                  send_message(buffer, cli->uid);
+    *                  send_message(buffer, cli->clientID);
     *                  str_trim_lf(buffer, strlen(buffer));
     *                  printf("%s\n", buffer);
     *
@@ -109,7 +110,7 @@ void *handle_client(void *arg) {
     *          } else if (receive == 0 || strcmp(buffer, "exit") == 0) {
     *              sprintf(buffer, "%s has left\n", cli->name);
     *              printf("%s", buffer);
-    *              send_message(buffer, cli->uid);
+    *              send_message(buffer, cli->clientID);
     *              leave_flag = 1;
     *          } else {
     *              printf("ERROR: -1\n");
@@ -121,24 +122,24 @@ void *handle_client(void *arg) {
 
     int bolExit = 0;
     int n;
-    int newsockfd = cli->sockfd;
+    int clientSockFD = cli->sockfd;
 
     while (bolExit == 0) {
-        listenToClient(buffer,newsockfd);
+        listenToClient(buffer, clientSockFD);
         char *typSpravy;
         typSpravy = strtok(buffer, " ");
 
         if (strcmp(typSpravy, "registracia") == 0) {
-            spracovanieRegistracie(newsockfd, n);
+            spracovanieRegistracie(clientSockFD);
 
         } else if (strcmp(typSpravy, "prihlasenie") == 0) {
-            spracovaniePrihlasenia(newsockfd, n);
+            spracovaniePrihlasenia(clientSockFD);
 
         } else if (strcmp(typSpravy, "chatovanie") == 0) {
-            spracovanieChatovania(newsockfd, n);
+            spracovanieChatovania(clientSockFD);
 
         } else if (strcmp(typSpravy, "zrusenie") == 0) {
-            spracovanieZruseniaUctu(newsockfd, n);
+            spracovanieZruseniaUctu(clientSockFD);
 
         } else if (strcmp(typSpravy, "exit") == 0) {
             bolExit = 1;
@@ -151,13 +152,13 @@ void *handle_client(void *arg) {
 //            strcpy(cli->name, meno);
 //            sprintf(buffer, "\n%s has joined\n", cli->name);
 //            printf("%s", buffer);
-//            send_message(buffer, cli->uid);
+//            send_message(buffer, cli->clientID);
 
         }
     }
 
-    close(newsockfd);
-    queue_remove(cli->uid);
+    close(clientSockFD);
+    queue_remove(cli->clientID);
     free(cli);
     cli_count--;
     pthread_detach(pthread_self());
@@ -165,11 +166,10 @@ void *handle_client(void *arg) {
 }
 
 int main(int argc, char *argv[]) {
-    int sockfd, newsockfd;
+    int sockfd, clientSockFD;
     socklen_t cli_len;
     // server address, client address
     struct sockaddr_in serv_addr, cli_addr;
-    pthread_t vlakno;
 
     if (argc < 2) {
         fprintf(stderr, "usage %s port\n", argv[0]);
@@ -182,8 +182,6 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(atoi(argv[1]));
 
-    // SIGNALS
-    // signal(SIGPIPE, SIG_IGN);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -207,8 +205,8 @@ int main(int argc, char *argv[]) {
     while (1) {
         cli_len = sizeof(cli_addr);
         // CONNECTION TO CLIENT
-        newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
-        if (newsockfd < 0) {
+        clientSockFD = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
+        if (clientSockFD < 0) {
             perror("ERROR on accept");
             return 3;
         }
@@ -216,19 +214,20 @@ int main(int argc, char *argv[]) {
          *      if ((cli_count + 1) == MAX_CLIENTS) {
          *          printf("Maximum clients connected. Connection rejected.\n");
          *          print_ip_addr(cli_addr);
-         *          close(newsockfd);
+         *          close(clientSockFD);
          *          continue;
          *      }
          */
         // CLIENT SETTINGS
         client_t *cli = (client_t *) malloc(sizeof(client_t));
         cli->address = cli_addr;
-        cli->sockfd = newsockfd;
-        cli->uid = uid++;
+        cli->sockfd = clientSockFD;
+        cli->clientID = clientIDstart++;
 
-        // ADD CLIENT TO QUEUE
         queue_add(cli);
-        pthread_create(&vlakno, NULL, &handle_client, (void *) cli);
+
+        pthread_t vlakno;
+        pthread_create(&vlakno, NULL, &obsluhaKlienta, (void *) cli);
 
         // REDUCE CPU USAGE
         sleep(1);
@@ -241,7 +240,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void spracovaniePrihlasenia(int newsockfd, int n) {
+void spracovaniePrihlasenia(int newsockfd) {
     char *login;
     char *heslo;
 
@@ -260,7 +259,7 @@ void spracovaniePrihlasenia(int newsockfd, int n) {
 
 }
 
-void spracovanieRegistracie(int newsockfd, int n) {
+void spracovanieRegistracie(int newsockfd) {
     char *login;
     char *heslo;
     char *potvrdeneHeslo;
@@ -283,16 +282,21 @@ void spracovanieRegistracie(int newsockfd, int n) {
 
 }
 
-void spracovanieChatovania(int newsockfd, int n) {
+void spracovanieChatovania(int newsockfd) {
     char *sprava;
     sprava = strtok(NULL, "/0");
     printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s\n", sprava);
 
+    char *buffer;
+    strcat(buffer, "Dostali ste spravu: ");
+    strcat(buffer, sprava);
+
+    send_message(buffer,11);
     char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
     writeToClient(msg,newsockfd);
 }
 
-void spracovanieZruseniaUctu(int newsockfd, int n) {
+void spracovanieZruseniaUctu(int newsockfd) {
     char *login;
     char *heslo;
 
@@ -300,8 +304,6 @@ void spracovanieZruseniaUctu(int newsockfd, int n) {
     heslo = strtok(NULL, "/0");
 
     int del = zrusenieUctu(login, heslo);
-
-
     char *msg;
     if (del == 1) {
         msg = "\n\033[32;1mSERVER: Uspesne zrusenie uctu.\033[0m\n";

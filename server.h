@@ -116,13 +116,13 @@ int zrusenieUctu(char* login, char* heslo) {
     }
 }
 
-void spracovanieRegistracie(int newsockfd, int n);
+void spracovanieRegistracie(int newsockfd);
 
-void spracovaniePrihlasenia(int newsockfd, int n);
+void spracovaniePrihlasenia(int newsockfd);
 
-void spracovanieChatovania(int newsockfd, int n);
+void spracovanieChatovania(int newsockfd);
 
-void spracovanieZruseniaUctu(int newsockfd, int n);
+void spracovanieZruseniaUctu(int newsockfd);
 
 void writeToClient(char buffer[], int sockfd);
 

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define BUFFER_SIZE 256
 #define NAME_LENGTH 30
@@ -20,19 +21,17 @@ int sockfd = 0;
 char name[NAME_LENGTH];
 
 
-void recv_msg_handler() { //
+void *recv_msg_handler() {
 
-    char message[BUFFER_SIZE] = {};
+    char message[BUFFER_SIZE];
 
     while (1) {
-        int receive = read(sockfd, message, BUFFER_SIZE);
-        //int receive = recv(sockfd, message, BUFFER_SIZE, 0);
-        if (receive > 0) {
-            printf("%s \n", message);
-        } else if (receive == 0) {
-            break;
-        } else {
-            printf("SOMETHING BAD HAPPENED :(\n");
+        listenToServer(message,sockfd);
+        char *typSpravy;
+        typSpravy = strtok(message, " ");
+
+        if (strcmp(typSpravy, "chatovanie") == 0) {
+            printf("&s/n",message);
         }
         bzero(message, BUFFER_SIZE);
     }
@@ -125,35 +124,36 @@ int main(int argc, char *argv[]) {
             break;
         }
         resultUvodna = uvodnaObrazovka(buffer, sockfd, n);
-//        if (resultUvodna != 0) {
-//            /*if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
+        if (resultUvodna != 0) {
+//            if (pthread_create(&send_msg_thread, NULL, (void *) send_msg_handler, NULL) != 0) {
 //                printf("ERROR: pthread\n");
 //                return EXIT_FAILURE;
-//            }*/
+//            }
 //
-//            /*if (pthread_create(&recv_msg_thread, NULL, (void *) recv_msg_handler, NULL) != 0) {
-//                printf("ERROR: pthread\n");
-//                return EXIT_FAILURE;
-//            }*/
+            if (pthread_create(&recv_msg_thread, NULL, recv_msg_handler, NULL) != 0) {
+                printf("ERROR: pthread\n");
+                return EXIT_FAILURE;
+            }
 //
 //            int n = write(sockfd, name, NAME_LENGTH);
 //        }
-        if (resultUvodna == 1) {
-            //koniec vrati 0, odhlasenie vrati 2
-            while (resultHlavna != 2) {
-                resultHlavna = hlavnaPonuka(buffer, sockfd, n);
-                if (resultHlavna == 0) {
-                    break;
+            if (resultUvodna == 1) {
+                //koniec vrati 0, odhlasenie vrati 2
+                while (resultHlavna != 2) {
+                    resultHlavna = hlavnaPonuka(buffer, sockfd, n);
+                    if (resultHlavna == 0) {
+                        break;
+                    }
                 }
+            } else {
+                continue;
             }
-        } else {
-            continue;
         }
+
+        close(sockfd);
+
+        return 0;
     }
-
-    close(sockfd);
-
-    return 0;
 }
 
 int registracia(char buffer[], int sockfd, int n) {
@@ -331,11 +331,7 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
             zrusenieUctu(buffer, sockfd, n);
             return -1;
         } else if (akcia == 0) {
-            n = write(sockfd, "exit", strlen("exit"));
-            if (n < 0) {
-                perror("Error writing to socket");
-                return 5;
-            }
+            writeToServer("exit",sockfd);
             return 0;
         } else {
             printf("\n\033[35;1mKLIENT: Nespravne zvolena akcia!\033[0m");
@@ -357,11 +353,7 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
         if (akcia == 1) {
             chatovanie(buffer, sockfd);
         } else if (akcia == 0) {
-            n = write(sockfd, "exit", strlen("exit"));
-            if (n < 0) {
-                perror("Error writing to socket");
-                return 5;
-            }
+            writeToServer("exit",sockfd);
             return 0;
         } else if (akcia == 2) {
             return 2;

@@ -22,3 +22,5 @@ int hlavnaPonuka(char buffer[], int sockfd, int n);
 void writeToServer(char buffer[], int sockfd);
 
 void listenToServer(char buffer[], int sockfd);
+
+void klientovCyklus(int sockfd);

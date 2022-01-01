@@ -82,6 +82,8 @@ void *obsluhaKlienta(void *arg) {
     cli_count++;
 
     client_t *cli = (client_t *) arg;
+
+    printf("Pripojil sa klient so socketom: %d\n", cli->sockfd);
     /*
     *      // RECEIVING NAME FROM THE CLIENT
     *      } else {
@@ -251,9 +253,19 @@ void spracovaniePrihlasenia(int newsockfd) {
 
     char *msg;
     if (log == 1) {
-        msg = "\n\033[32;1mSERVER: Uspesne prihlasenie.\033[0m\n";
+        //msg = "\n\033[32;1mSERVER: Uspesne prihlasenie.\033[0m\n";
+        msg = "LOGINTRUE";
+
+        for (int i = 0; i < MAX_CLIENTS; ++i) {
+            if (newsockfd == clients[i]->sockfd) {
+                strcpy(clients[i]->name, login);
+                break;
+            }
+        }
+
     } else {
-        msg = "\n\033[32;1mSERVER: Neuspesne prihlasenie. Nespravne meno alebo heslo.\033[0m\n";
+        //msg = "\n\033[32;1mSERVER: Neuspesne prihlasenie. Nespravne meno alebo heslo.\033[0m\n";
+        msg = "LOGINFALSE";
     }
     writeToClient(msg,newsockfd);
 
@@ -272,11 +284,20 @@ void spracovanieRegistracie(int newsockfd) {
 
     char *msg;
     if (reg == 1) {
-        msg = "\n\033[32;1mSERVER: Uspesna registracia.\033[0m\n";
+        //msg = "\n\033[32;1mSERVER: Uspesna registracia.\033[0m\n";
+        msg = "REGTRUE";
+        for (int i = 0; i < MAX_CLIENTS; ++i) {
+            if (newsockfd == clients[i]->sockfd) {
+                strcpy(clients[i]->name, login);
+                break;
+            }
+        }
     } else if (reg == 0) {
-        msg = "\n\033[32;1mSERVER: Neuspesna registracia. Zadany login uz existuje.\033[0m\n";
+        //msg = "\n\033[32;1mSERVER: Neuspesna registracia. Zadany login uz existuje.\033[0m\n";
+        msg = "REGFALSE";
     } else {
-        msg = "\n\033[32;1mSERVER: Neuspesna registracia. Hesla sa nezhoduju.\033[0m\n";
+        //msg = "\n\033[32;1mSERVER: Neuspesna registracia. Hesla sa nezhoduju.\033[0m\n";
+        msg = "REGFALSE";
     }
     writeToClient(msg,newsockfd);
 
@@ -287,13 +308,23 @@ void spracovanieChatovania(int newsockfd) {
     sprava = strtok(NULL, "/0");
     printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s\n", sprava);
 
-    char *buffer;
-    strcat(buffer, "Dostali ste spravu: ");
-    strcat(buffer, sprava);
+//    char *buffer;
+//    strcat(buffer, "Dostali ste spravu: ");
+//    strcat(buffer, sprava);
 
-    send_message(buffer,11);
-    char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
+    //char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
+    char *msg = "SPRAVA";
     writeToClient(msg,newsockfd);
+
+    char pomocnyBuffer[BUFFER_SIZE];
+    strcat(pomocnyBuffer, "USER_SPRAVA");
+    strcat(pomocnyBuffer, " ");
+    strcat(pomocnyBuffer, odosielatel);
+    strcat(pomocnyBuffer, " ");
+    strcat(pomocnyBuffer, sprava);
+
+    send_message(pomocnyBuffer, prijemca);
+
 }
 
 void spracovanieZruseniaUctu(int newsockfd) {

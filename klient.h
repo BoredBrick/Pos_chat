@@ -15,9 +15,6 @@ int chatovanie(char buffer[], int sockfd);
 
 int zrusenieUctu(char buffer[], int sockfd, int n);
 
-int uvodnaObrazovka(char buffer[], int sockfd, int n);
-
-int hlavnaPonuka(char buffer[], int sockfd, int n);
 
 void writeToServer(char buffer[], int sockfd);
 

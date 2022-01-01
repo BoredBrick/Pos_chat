@@ -328,6 +328,7 @@ void spracovanieChatovania(int newsockfd) {
     writeToClient(msg,newsockfd);
 
     char pomocnyBuffer[BUFFER_SIZE];
+    bzero(pomocnyBuffer,BUFFER_SIZE);
     strcat(pomocnyBuffer, "USER_SPRAVA");
     strcat(pomocnyBuffer, " ");
     strcat(pomocnyBuffer, odosielatel);

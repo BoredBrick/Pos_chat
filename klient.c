@@ -91,7 +91,7 @@ void klientovCyklus(int sockfd) {
         }
 
         if (akcia == 0) {
-            writeToServer("exit",sockfd);
+            writeToServer("exit", sockfd);
             break;
         }
 
@@ -108,7 +108,7 @@ void klientovCyklus(int sockfd) {
                     // spravy od servera
 
 
-                    listenToServer(msgBuffer,sockfd);
+                    listenToServer(msgBuffer, sockfd);
 
                     char *prikaz;
                     char *odosielatel;
@@ -220,13 +220,14 @@ void klientovCyklus(int sockfd) {
                             strcat(buffer, " ");
                             strcat(buffer, name);
                             strcat(buffer, " ");
-                            strcat(buffer, sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
+                            strcat(buffer,
+                                   sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
                             buffer[strcspn(buffer, "\n")] = 0;
                             //chatovanie mojeMeno Admin text spravy
                             //moja sprava je poslana na server
                             writeToServer(buffer, sockfd);
 
-                        } else if(akcia == 2) {
+                        } else if (akcia == 2) {
                             continue;
                         } else if (akcia == 3) {
                             jePrihlaseny = 0;
@@ -320,7 +321,6 @@ int chatovanie(char buffer[], int sockfd) {
 int zrusenieUctu(char buffer[], int sockfd, int n) {
 
 }
-
 
 
 void writeToServer(char *buffer, int sockfd) {

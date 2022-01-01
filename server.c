@@ -60,11 +60,12 @@ void queue_remove(int clientID) {
 }
 
 //posle spravu konkretnemu clientID
-void send_message(char *s, int clientID) {
+void send_message(char *s, char *komu) {
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i]) {
-            if (clients[i]->clientID == clientID) {
+            if (strcmp(clients[i]->name,komu) == 0) {
+                printf("Zapisujem na socket: %d\n", clients[i]->sockfd);
                 if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
                     printf("ERROR: write to descriptor failed\n");
                 }
@@ -304,6 +305,16 @@ void spracovanieRegistracie(int newsockfd) {
 }
 
 void spracovanieChatovania(int newsockfd) {
+    // mojeMeno admin text spravy
+    // ODOSIELATEL PRIJIMATEL SPRAVA
+
+    char *odosielatel;
+    odosielatel = strtok(NULL, " ");
+
+    //admin text spravy
+    char *prijemca;
+    prijemca = strtok(NULL, " ");
+    //text spravy
     char *sprava;
     sprava = strtok(NULL, "/0");
     printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s\n", sprava);

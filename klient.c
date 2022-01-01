@@ -33,7 +33,7 @@ void *recv_msg_handler() {
         typSpravy = strtok_r(message, " ", &saveptr);
 
         if (strcmp(typSpravy, "chatovanie") == 0) {
-            printf("&s/n",message);
+            printf("&s/n", message);
         }
     }
 }
@@ -333,11 +333,11 @@ int main(int argc, char *argv[]) {
 //            }
 //        }
 
-        close(sockfd);
+    close(sockfd);
 
-        return 0;
-    }
+    return 0;
 }
+//}
 
 int registracia(char buffer[], int sockfd, int n) {
     char login[30], heslo[30], potvrdeneHeslo[30];
@@ -445,6 +445,7 @@ int chatovanie(char buffer[], int sockfd) {
         strcat(buffer, sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
         buffer[strcspn(buffer, "\n")] = 0;
 
+
         //moja sprava je poslana na server
         writeToServer(buffer, sockfd);
         //server odpovie, ze spravu dostal
@@ -517,7 +518,7 @@ int uvodnaObrazovka(char buffer[], int sockfd, int n) {
             zrusenieUctu(buffer, sockfd, n);
             return -1;
         } else if (akcia == 0) {
-            writeToServer("exit",sockfd);
+            writeToServer("exit", sockfd);
             return 0;
         } else {
             printf("\n\033[35;1mKLIENT: Nespravne zvolena akcia!\033[0m");
@@ -539,7 +540,7 @@ int hlavnaPonuka(char buffer[], int sockfd, int n) {
         if (akcia == 1) {
             chatovanie(buffer, sockfd);
         } else if (akcia == 0) {
-            writeToServer("exit",sockfd);
+            writeToServer("exit", sockfd);
             return 0;
         } else if (akcia == 2) {
             return 2;

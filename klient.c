@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
     struct hostent *server;
     char buffer[256];
 
-    pthread_t send_msg_thread, recv_msg_thread;
+    pthread_t recv_msg_thread;
 
     if (argc < 3) {
         fprintf(stderr, "usage %s hostname port\n", argv[0]);

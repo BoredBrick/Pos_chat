@@ -334,6 +334,7 @@ void spracovanieChatovania(int newsockfd) {
     strcat(pomocnyBuffer, odosielatel);
     strcat(pomocnyBuffer, " ");
     strcat(pomocnyBuffer, sprava);
+    strcat(pomocnyBuffer, "\n");
 
     send_message(pomocnyBuffer, prijemca);
 

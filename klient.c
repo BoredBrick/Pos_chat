@@ -7,252 +7,18 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <pthread.h>
 
-#define BUFFER_SIZE 256
-#define NAME_LENGTH 30
 
-// volatile sig_atomic_t flag = 0;
 int sockfd = 0;
-char name[NAME_LENGTH];
-int jePrihlaseny = 0;
 
-//pthread_mutex_t klient_mutex = PTHREAD_MUTEX_INITIALIZER;
+void klientovCyklus2(int sockfd) {
 
-typedef struct data {
-    int *bolExit;
-} D;
+    int prebiehaRegistracia = 0, prebiehaPrihlasenie = 0, prebiehaChat = 0;
 
-//void *prijimanieSpravZoServera(void *data) {
-//    D *d = data;
-//    fd_set klientFD;
-//    char msgBuffer[BUFFER_SIZE] = {};
-//
-//    //Resetovanie fd
-//    FD_ZERO(&klientFD);
-//    FD_SET(sockfd, &klientFD);
-//    FD_SET(0, &klientFD);
-//
-//    //pthread_mutex_lock(&klient_mutex);
-//    while ((*d->bolExit) == 0) {
-//        //pthread_mutex_unlock(&klient_mutex);
-//        //pthread_mutex_lock(&klient_mutex);
-//
-//        //if (select(FD_SETSIZE, &klientFD, NULL, NULL, NULL) != -1) //cakanie na volne fd
-//        //{
-//            for (int fd = 0; fd < FD_SETSIZE; fd++) {
-//                if (FD_ISSET(fd, &klientFD)) {
-//                    if (fd == sockfd) { //prijatie dat zo servera
-//
-//                        listenToServer(msgBuffer, sockfd);
-//
-//                        char *prikaz;
-//                        char *odosielatel;
-//                        char *sprava;
-//
-//                        prikaz = strtok(msgBuffer, " "); // vyseknutie prikazu zo serveru
-//
-//                        if (strcmp(prikaz, "REGFALSE") == 0) {
-//
-//                            puts("Registrácia bola neúspešná!");
-//
-//                        } else if (strcmp(prikaz, "REGTRUE") == 0) {
-//                            jePrihlaseny = 1;
-//                            puts("Registrácia prebehla úspešne!");
-//
-//                        } else if (strcmp(prikaz, "LOGINFALSE") == 0) {
-//
-//                            puts("Prihlásenie bolo neúspešné!");
-//
-//                        } else if (strcmp(prikaz, "LOGINTRUE") == 0) {
-//                            jePrihlaseny = 1;
-//                            puts("Prihlásenie prebehlo uspešne!");
-//
-//                        } else if (strcmp(prikaz, "SPRAVA") == 0) {
-//                            puts("Sprava bola prijata!");
-//
-//                        } else if (strcmp(prikaz, "USER_SPRAVA") == 0) {
-//                            odosielatel = strtok(NULL, " ");
-//                            sprava = strtok(NULL, "\0");
-//                            puts("Nova sprava od ineho klienta");
-//                            printf("Nova sprava od %s : %s\n", odosielatel, sprava);
-//                            fflush(stdout);
-//
-//                        }
-//
-//                        bzero(msgBuffer, BUFFER_SIZE);
-//
-//
-//                        //pthread_mutex_unlock(&klient_mutex);
-//                    }
-//
-//                    return NULL;
-//                }
-//            }
-//        //}
-//    }
-//}
-//
-//
-//void *posielanieSpravNaServer(void *data) {
-//    D *d = data;
-//    fd_set klientFD;
-//    char buffer[BUFFER_SIZE] = {};
-//
-//    //Resetovanie fd
-//    FD_ZERO(&klientFD);
-//    FD_SET(sockfd, &klientFD);
-//    FD_SET(0, &klientFD);
-//
-//    pthread_mutex_lock(&klient_mutex);
-//    while ((*d->bolExit) == 0) {
-//        pthread_mutex_unlock(&klient_mutex);
-//        //pthread_mutex_lock(&klient_mutex);
-//
-//        //if (select(FD_SETSIZE, &klientFD, NULL, NULL, NULL) != -1) //cakanie na volne fd
-//        //{
-//            for (int fd = 0; fd < FD_SETSIZE; fd++) {
-//                if (FD_ISSET(fd, &klientFD)) {
-//                    if (fd == sockfd) { // poslanie dat na server
-//
-//
-//                        int akcia = -1;
-//                        if (!jePrihlaseny) {
-//                            puts("\033[36;1m|--- CHAT APP ---|\033[0m");
-//                            puts("[1] Registracia");
-//                            puts("[2] Prihlasenie");
-//                            puts("[3] Zrusenie uctu");
-//                            puts("[0] Koniec");
-//                            printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
-//                            scanf("%d", &akcia);
-//                            getchar();
-//                        } else {
-//                            puts("[1] Posli spravu");
-//                            puts("[2] Ziskaj spravu");
-//                            puts("[3] Odhlasenie");
-//                            puts("[0] Koniec");
-//                            printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
-//                            scanf("%d", &akcia);
-//                            getchar();
-//                        }
-//
-//                        if (akcia == 0) {
-//                            (*d->bolExit) = 1;
-//                            writeToServer("exit", sockfd);
-//                            break;
-//                        }
-//
-//                        if (!jePrihlaseny) {
-//
-//                            if (akcia == 1) {
-//                                char buffer[256];
-//                                char login[30], heslo[30], potvrdeneHeslo[30];
-//                                bzero(buffer, 256);
-//                                printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-//                                scanf("%s", &login);
-//                                getchar();
-//                                printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
-//                                scanf("%s", &heslo);
-//                                getchar();
-//                                printf("\n\033[35;1mKLIENT: Potvrdte zadane heslo: \033[0m");
-//                                scanf("%s", &potvrdeneHeslo);
-//                                getchar();
-//
-//                                // Poskladanie spravy
-//                                strcat(buffer, "registracia");
-//                                strcat(buffer, " ");
-//                                strcat(buffer, login);
-//                                strcat(buffer, " ");
-//                                strcat(buffer, heslo);
-//                                strcat(buffer, " ");
-//                                strcat(buffer, potvrdeneHeslo);
-//
-//                                buffer[strcspn(buffer, "\n")] = 0;
-//
-//                                strcpy(name, login);
-//
-//                                // Poslanie udajov serveru
-//                                writeToServer(buffer, sockfd);
-//                            } else if (akcia == 2) {
-//                                char buffer[256];
-//                                char login[30], heslo[30];
-//                                bzero(buffer, 256);
-//                                printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-//                                scanf("%s", &login);
-//                                getchar();
-//                                printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
-//                                scanf("%s", &heslo);
-//                                getchar();
-//
-//                                // Poskladanie spravy
-//                                strcat(buffer, "prihlasenie");
-//                                strcat(buffer, " ");
-//                                strcat(buffer, login);
-//                                strcat(buffer, " ");
-//                                strcat(buffer, heslo);
-//
-//                                buffer[strcspn(buffer, "\n")] = 0;
-//
-//                                strcpy(name, login);
-//
-//                                // Poslanie udajov serveru
-//                                writeToServer(buffer, sockfd);
-//
-//                            }
-//
-//
-//                        } else {
-//                            if (akcia == 1) {
-//                                char buffer[256];
-//
-//                                char sprava[30];
-//
-//                                printf("\n\033[35;1mKLIENT: Prosim, zadajte spravu: \033[0m");
-//                                bzero(buffer, 256);
-//                                scanf("%[^\n]s", &sprava);
-//                                getchar();
-//
-//                                strcat(buffer, "chatovanie");
-//                                strcat(buffer, " ");
-//                                strcat(buffer, name);
-//                                strcat(buffer, " ");
-//                                strcat(buffer,
-//                                       sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
-//                                buffer[strcspn(buffer, "\n")] = 0;
-//                                //chatovanie mojeMeno Admin text spravy
-//                                //moja sprava je poslana na server
-//                                writeToServer(buffer, sockfd);
-//
-//                            } else if (akcia == 2) {
-//                                continue;
-//                            } else if (akcia == 3) {
-//                                jePrihlaseny = 0;
-//
-//                            }
-//                        }
-//                    }
-//
-//
-//                    //pthread_mutex_unlock(&klient_mutex);
-//                }
-//
-//                return NULL;
-//            }
-//        //}
-//    }
-//}
-
-
-void klientovCyklus(int sockfd) {
-    fd_set klientFD;
-
-    char sprava[BUFFER_SIZE];
     char msgBuffer[BUFFER_SIZE];
-    char chatBuffer[BUFFER_SIZE];
 
     while (1) {
         int akcia = -1;
@@ -266,17 +32,89 @@ void klientovCyklus(int sockfd) {
             scanf("%d", &akcia);
             getchar();
         } else {
-            puts("[1] Posli spravu");
-            puts("[2] Ziskaj spravu");
-            puts("[3] Odhlasenie");
-            puts("[0] Koniec");
-            printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
-            scanf("%d", &akcia);
-            getchar();
+            if (prebiehaChat == 0) {
+                puts("[1] Posli spravu");
+                puts("[2] Ziskaj spravu");
+                puts("[3] Odhlasenie");
+                puts("[0] Koniec");
+                printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
+                scanf("%d", &akcia);
+                getchar();
+            } else {
+                akcia = 1;
+            }
         }
 
         if (akcia == 0) {
             writeToServer("exit", sockfd);
+            break;
+        }
+
+        // citanie z klavesnice a posielanie na server
+        // spravy serveru
+        if (!jePrihlaseny) {
+
+            if (akcia == 1) {
+                char buffer[256];
+                prebiehaRegistracia = registracia2(buffer, sockfd);
+
+            } else if (akcia == 2) {
+                char buffer[256];
+                prebiehaPrihlasenie = prihlasenie2(buffer, sockfd);
+
+            }
+
+        } else {
+            if (akcia == 1) {
+                char buffer[256];
+                prebiehaChat = chatovanie2(buffer, sockfd);
+
+            } else if (akcia == 2) {
+                continue;
+
+            } else if (akcia == 3) {
+                jePrihlaseny = 0;
+
+            }
+        }
+    }
+}
+
+void klientovCyklus(int sockfd) {
+    fd_set klientFD;
+
+    int prebiehaRegistracia = 0, prebiehaPrihlasenie = 0, prebiehaZrusenieUctu = 0, prebiehaChat = 0;
+
+    char buffer[BUFFER_SIZE];
+    char msgBuffer[BUFFER_SIZE];
+
+    while (1) {
+        int akcia = -1;
+        if (!jePrihlaseny) {
+            puts("\033[36;1m|--- CHAT APP ---|\033[0m");
+            puts("[1] Prihlasenie");
+            puts("[2] Registracia");
+            puts("[3] Zrusenie uctu");
+            puts("[0] Koniec");
+            printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
+            scanf("%d", &akcia);
+            getchar();
+        } else {
+            if (prebiehaChat == 0) {
+                puts("[1] Posli spravu");
+                puts("[2] Ziskaj spravu");
+                puts("[3] Odhlasenie");
+                puts("[0] Koniec");
+                printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
+                scanf("%d", &akcia);
+                getchar();
+            } else {
+                akcia = 1;
+            }
+        }
+
+        if (akcia == 0) {
+            ukoncenieAplikacie(buffer, sockfd);
             break;
         }
 
@@ -292,8 +130,9 @@ void klientovCyklus(int sockfd) {
                 if (fd == sockfd) { //prijatie dat zo servera
                     // spravy od servera
 
-
                     listenToServer(msgBuffer, sockfd);
+
+                    odsifrujRetazec(msgBuffer, msgBuffer);
 
                     char *prikaz;
                     char *odosielatel;
@@ -301,30 +140,34 @@ void klientovCyklus(int sockfd) {
 
                     prikaz = strtok(msgBuffer, " "); // vyseknutie prikazu zo serveru
 
-                    if (strcmp(prikaz, "REGFALSE") == 0) {
+                    if (strcmp(prikaz, NEUSPESNA_REGISTRACIA) == 0) {
+                        puts("Registracia bola neuspesna!");
 
-                        puts("Registrácia bola neúspešná!");
-
-                    } else if (strcmp(prikaz, "REGTRUE") == 0) {
+                    } else if (strcmp(prikaz, USPESNA_REGISTRACIA) == 0) {
                         jePrihlaseny = 1;
-                        puts("Registrácia prebehla úspešne!");
+                        puts("Registracia prebehla uspesne!");
 
-                    } else if (strcmp(prikaz, "LOGINFALSE") == 0) {
+                    } else if (strcmp(prikaz, NEUSPESNE_PRIHLASENIE) == 0) {
+                        puts("Prihlasenie bolo neuspesne!");
 
-                        puts("Prihlásenie bolo neúspešné!");
-
-                    } else if (strcmp(prikaz, "LOGINTRUE") == 0) {
+                    } else if (strcmp(prikaz, USPESNE_PRIHLASENIE) == 0) {
                         jePrihlaseny = 1;
-                        puts("Prihlásenie prebehlo uspešne!");
+                        puts("Prihlasenie prebehlo uspesne!");
 
-                    } else if (strcmp(prikaz, "SPRAVA") == 0) {
+                    } else if (strcmp(prikaz, NEUSPESNE_ZRUSENIE) == 0) {
+                        puts("Zrusenie uctu bolo neuspesne!");
+
+                    } else if (strcmp(prikaz, USPESNE_ZRUSENIE) == 0) {
+                        puts("Zrusenie uctu prebehlo uspesne!");
+
+                    } else if (strcmp(prikaz, SPRAVA_ODOSIELATELOVI) == 0) {
                         puts("Sprava bola prijata!");
 
-                    } else if (strcmp(prikaz, "USER_SPRAVA") == 0) {
+                    } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
                         odosielatel = strtok(NULL, " ");
                         sprava = strtok(NULL, "\0");
                         puts("Nova sprava od ineho klienta");
-                        printf("Nova sprava od %s : %s\n", odosielatel, sprava);
+                        printf("Nova sprava od %s: %s\n", odosielatel, sprava);
                         fflush(stdout);
 
                     }
@@ -335,90 +178,31 @@ void klientovCyklus(int sockfd) {
                     if (!jePrihlaseny) {
 
                         if (akcia == 1) {
-                            char buffer[256];
-                            char login[30], heslo[30], potvrdeneHeslo[30];
-                            bzero(buffer, 256);
-                            printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-                            scanf("%s", &login);
-                            getchar();
-                            printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
-                            scanf("%s", &heslo);
-                            getchar();
-                            printf("\n\033[35;1mKLIENT: Potvrdte zadane heslo: \033[0m");
-                            scanf("%s", &potvrdeneHeslo);
-                            getchar();
+                            prebiehaPrihlasenie = prihlasenie(buffer, sockfd);
 
-                            // Poskladanie spravy
-                            strcat(buffer, "registracia");
-                            strcat(buffer, " ");
-                            strcat(buffer, login);
-                            strcat(buffer, " ");
-                            strcat(buffer, heslo);
-                            strcat(buffer, " ");
-                            strcat(buffer, potvrdeneHeslo);
-
-                            buffer[strcspn(buffer, "\n")] = 0;
-
-                            strcpy(name, login);
-
-                            // Poslanie udajov serveru
-                            writeToServer(buffer, sockfd);
                         } else if (akcia == 2) {
-                            char buffer[256];
-                            char login[30], heslo[30];
-                            bzero(buffer, 256);
-                            printf("\n\033[35;1mKLIENT: Zadajte login: \033[0m");
-                            scanf("%s", &login);
-                            getchar();
-                            printf("\n\033[35;1mKLIENT: Zadajte heslo: \033[0m");
-                            scanf("%s", &heslo);
-                            getchar();
+                            prebiehaRegistracia = registracia(buffer, sockfd);
 
-                            // Poskladanie spravy
-                            strcat(buffer, "prihlasenie");
-                            strcat(buffer, " ");
-                            strcat(buffer, login);
-                            strcat(buffer, " ");
-                            strcat(buffer, heslo);
-
-                            buffer[strcspn(buffer, "\n")] = 0;
-
-                            strcpy(name, login);
-
-                            // Poslanie udajov serveru
-                            writeToServer(buffer, sockfd);
-
+                        } else if (akcia == 3) {
+                            prebiehaZrusenieUctu = zrusenieUctu(buffer, sockfd);
                         }
 
                     } else {
                         if (akcia == 1) {
-                            char buffer[256];
-
-                            char sprava[30];
-
-                            printf("\n\033[35;1mKLIENT: Prosim, zadajte spravu: \033[0m");
-                            bzero(buffer, 256);
-                            scanf("%[^\n]s", &sprava);
-                            getchar();
-
-                            strcat(buffer, "chatovanie");
-                            strcat(buffer, " ");
-                            strcat(buffer, name);
-                            strcat(buffer, " ");
-                            strcat(buffer,
-                                   sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
-                            buffer[strcspn(buffer, "\n")] = 0;
-                            //chatovanie mojeMeno Admin text spravy
-                            //moja sprava je poslana na server
-                            writeToServer(buffer, sockfd);
-
+                            prebiehaChat = chatovanie(buffer, sockfd);
+                            if (prebiehaChat == 0) {
+                                break;
+                            }
                         } else if (akcia == 2) {
                             continue;
+
                         } else if (akcia == 3) {
                             jePrihlaseny = 0;
+                            break;
 
                         }
                     }
+                    bzero(buffer, BUFFER_SIZE);
                 }
             }
         }
@@ -432,10 +216,6 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in serv_addr;
     struct hostent *server;
     char buffer[256];
-
-    //pthread_t writeVlakno;
-    //pthread_t readVlakno;
-
 
     if (argc < 3) {
         fprintf(stderr, "usage %s hostname port\n", argv[0]);
@@ -470,22 +250,9 @@ int main(int argc, char *argv[]) {
         return 4;
     }
 
-    //int bolExit = 0;
-    //D d = {&bolExit};
-
-//    pthread_create(&writeVlakno, NULL, &posielanieSpravNaServer, &d);
-//    pthread_create(&readVlakno, NULL, &prijimanieSpravZoServera, &d);
-
-
-    // pthread_join(writeVlakno, NULL);
-    // pthread_join(readVlakno, NULL);
-
     klientovCyklus(sockfd);
 
-
-
-
-
+    //klientovCyklus2(sockfd);
 
     close(sockfd);
 
@@ -493,36 +260,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-int registracia(char buffer[], int sockfd, int n) {
-
-}
-
-int prihlasenie(char buffer[], int sockfd, int n) {
-
-}
-
-int chatovanie(char buffer[], int sockfd) {
-
-}
-
-int zrusenieUctu(char buffer[], int sockfd, int n) {
-
-}
 
 
-void writeToServer(char *buffer, int sockfd) {
-    int n = write(sockfd, buffer, strlen(buffer));
-    if (n < 0) {
-        perror("Error writing to socket");
-    }
-}
-
-void listenToServer(char *buffer, int sockfd) {
-    bzero(buffer, 256);
-    int n = read(sockfd, buffer, 255);
-    if (n < 0) {
-        perror("Error reading from socket");
-    }
-}
 
 

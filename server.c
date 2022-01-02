@@ -11,22 +11,17 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define BUFFER_SIZE 256
-#define NAME_LENGTH 30
-#define MAX_CLIENTS 10
-
 static _Atomic unsigned int cli_count = 0;
 static int clientIDstart = 10;
 
 // CLIENT STRUCTURE
-
 typedef struct {
     struct sockaddr_in address;
     int sockfd;
     int clientID;
-    char name[NAME_LENGTH];
+    char name[LOGIN_MAX_DLZKA];
 } client_t;
-client_t *clients[MAX_CLIENTS];
+client_t *clients[KLIENTI_MAX_POCET];
 
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -34,7 +29,7 @@ pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 void queue_add(client_t *client) {
     pthread_mutex_lock(&clients_mutex);
 
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (!clients[i]) {
             clients[i] = client;
             break;
@@ -48,7 +43,7 @@ void queue_add(client_t *client) {
 void queue_remove(int clientID) {
     pthread_mutex_lock(&clients_mutex);
 
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (clients[i]) {
             if (clients[i]->clientID == clientID) {
                 clients[i] = NULL;
@@ -62,10 +57,11 @@ void queue_remove(int clientID) {
 //posle spravu konkretnemu clientID
 void send_message(char *s, char *komu) {
     pthread_mutex_lock(&clients_mutex);
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (clients[i]) {
-            if (strcmp(clients[i]->name,komu) == 0) {
+            if (strcmp(clients[i]->name, komu) == 0) {
                 printf("Zapisujem na socket: %d\n", clients[i]->sockfd);
+                sifrujRetazec(s, s);
                 if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
                     printf("ERROR: write to descriptor failed\n");
                 }
@@ -85,43 +81,6 @@ void *obsluhaKlienta(void *arg) {
     client_t *cli = (client_t *) arg;
 
     printf("Pripojil sa klient so socketom: %d\n", cli->sockfd);
-    /*
-    *      // RECEIVING NAME FROM THE CLIENT
-    *      } else {
-    *          // CLIENT IS JOINING THE SERVER
-    *          strcpy(cli->name, name);
-    *          sprintf(buffer, "%s has joined\n", cli->name);
-    *          printf("%s", buffer);
-    *          send_message(buffer, cli->clientID);
-    *      }
-    *      bzero(buffer, BUFFER_SIZE);
-    *
-    *      while(1) {
-    *          if (leave_flag) {
-    *              break;
-    *          }
-    *
-    *          int receive = recv(cli->sockfd, buffer, BUFFER_SIZE, 0);
-    *
-    *          if (receive > 0) {
-    *              if (strlen(buffer) > 0) {
-    *                  send_message(buffer, cli->clientID);
-    *                  str_trim_lf(buffer, strlen(buffer));
-    *                  printf("%s\n", buffer);
-    *
-    *              }
-    *          } else if (receive == 0 || strcmp(buffer, "exit") == 0) {
-    *              sprintf(buffer, "%s has left\n", cli->name);
-    *              printf("%s", buffer);
-    *              send_message(buffer, cli->clientID);
-    *              leave_flag = 1;
-    *          } else {
-    *              printf("ERROR: -1\n");
-    *              leave_flag = 1;
-    *          }
-    *           bzero(buffer, BUFFER_SIZE);
-    *      }
-    */
 
     int bolExit = 0;
     int n;
@@ -129,33 +88,28 @@ void *obsluhaKlienta(void *arg) {
 
     while (bolExit == 0) {
         listenToClient(buffer, clientSockFD);
+        odsifrujRetazec(buffer, buffer);
+
         char *typSpravy;
         typSpravy = strtok(buffer, " ");
 
-        if (strcmp(typSpravy, "registracia") == 0) {
+        if (strcmp(typSpravy, REGISTRACIA) == 0) {
             spracovanieRegistracie(clientSockFD);
 
-        } else if (strcmp(typSpravy, "prihlasenie") == 0) {
+        } else if (strcmp(typSpravy, PRIHLASENIE) == 0) {
             spracovaniePrihlasenia(clientSockFD);
 
-        } else if (strcmp(typSpravy, "chatovanie") == 0) {
+        } else if (strcmp(typSpravy, CHATOVANIE) == 0) {
             spracovanieChatovania(clientSockFD);
 
-        } else if (strcmp(typSpravy, "zrusenie") == 0) {
+        } else if (strcmp(typSpravy, ZRUSENIE_UCTU) == 0) {
             spracovanieZruseniaUctu(clientSockFD);
 
-        } else if (strcmp(typSpravy, "exit") == 0) {
+        } else if (strcmp(typSpravy, EXIT) == 0) {
             bolExit = 1;
 
-        } else if (strcmp(typSpravy, "nickname") == 0) {
-            // int res =
-            char* meno;
-            meno = strtok(NULL, "/0");
-
-//            strcpy(cli->name, meno);
-//            sprintf(buffer, "\n%s has joined\n", cli->name);
-//            printf("%s", buffer);
-//            send_message(buffer, cli->clientID);
+        } else if (strcmp(typSpravy, UKONCENIE_CHATOVANIA) == 0) {
+            printf("Ukoncenie chatovania\n");
 
         }
     }
@@ -198,6 +152,7 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
+
     // Tento vypis dat skorej asi pod LISTENING
     printf("\033[32;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
 
@@ -237,7 +192,6 @@ int main(int argc, char *argv[]) {
 
     }
 
-
     close(sockfd);
 
     return 0;
@@ -252,24 +206,24 @@ void spracovaniePrihlasenia(int newsockfd) {
 
     int log = prihlasenie(login, heslo);
 
-    char *msg;
+    char msg[MESSAGE_MAX_DLZKA];
+    bzero(msg, MESSAGE_MAX_DLZKA);
     if (log == 1) {
-        //msg = "\n\033[32;1mSERVER: Uspesne prihlasenie.\033[0m\n";
-        msg = "LOGINTRUE";
 
-        for (int i = 0; i < MAX_CLIENTS; ++i) {
+        for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
             if (newsockfd == clients[i]->sockfd) {
                 strcpy(clients[i]->name, login);
                 break;
             }
         }
+        strcpy(msg, USPESNE_PRIHLASENIE);
 
     } else {
-        //msg = "\n\033[32;1mSERVER: Neuspesne prihlasenie. Nespravne meno alebo heslo.\033[0m\n";
-        msg = "LOGINFALSE";
-    }
-    writeToClient(msg,newsockfd);
+        strcpy(msg, NEUSPESNE_PRIHLASENIE);
 
+    }
+    sifrujRetazec(msg, msg);
+    writeToClient(msg, newsockfd);
 }
 
 void spracovanieRegistracie(int newsockfd) {
@@ -283,24 +237,23 @@ void spracovanieRegistracie(int newsockfd) {
 
     int reg = registracia(login, heslo, potvrdeneHeslo);
 
-    char *msg;
+    char msg[MESSAGE_MAX_DLZKA];
+    bzero(msg, MESSAGE_MAX_DLZKA);
     if (reg == 1) {
-        //msg = "\n\033[32;1mSERVER: Uspesna registracia.\033[0m\n";
-        msg = "REGTRUE";
-        for (int i = 0; i < MAX_CLIENTS; ++i) {
+        for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
             if (newsockfd == clients[i]->sockfd) {
                 strcpy(clients[i]->name, login);
                 break;
             }
         }
-    } else if (reg == 0) {
-        //msg = "\n\033[32;1mSERVER: Neuspesna registracia. Zadany login uz existuje.\033[0m\n";
-        msg = "REGFALSE";
+        strcpy(msg, USPESNA_REGISTRACIA);
+
     } else {
-        //msg = "\n\033[32;1mSERVER: Neuspesna registracia. Hesla sa nezhoduju.\033[0m\n";
-        msg = "REGFALSE";
+        strcpy(msg, NEUSPESNA_REGISTRACIA);
+
     }
-    writeToClient(msg,newsockfd);
+    sifrujRetazec(msg, msg);
+    writeToClient(msg, newsockfd);
 
 }
 
@@ -319,17 +272,15 @@ void spracovanieChatovania(int newsockfd) {
     sprava = strtok(NULL, "/0");
     printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s\n", sprava);
 
-//    char *buffer;
-//    strcat(buffer, "Dostali ste spravu: ");
-//    strcat(buffer, sprava);
-
-    //char *msg = "\n\033[32;1mSERVER: Sprava bola obdrzana.\033[0m\n";
-    char *msg = "SPRAVA";
-    writeToClient(msg,newsockfd);
+    char msg[MESSAGE_MAX_DLZKA];
+    bzero(msg, MESSAGE_MAX_DLZKA);
+    strcpy(msg, SPRAVA_ODOSIELATELOVI);
+    sifrujRetazec(msg, msg);
+    writeToClient(msg, newsockfd);
 
     char pomocnyBuffer[BUFFER_SIZE];
-    bzero(pomocnyBuffer,BUFFER_SIZE);
-    strcat(pomocnyBuffer, "USER_SPRAVA");
+    bzero(pomocnyBuffer, BUFFER_SIZE);
+    strcat(pomocnyBuffer, SPRAVA_PRIJIMATELOVI);
     strcat(pomocnyBuffer, " ");
     strcat(pomocnyBuffer, odosielatel);
     strcat(pomocnyBuffer, " ");
@@ -337,7 +288,6 @@ void spracovanieChatovania(int newsockfd) {
     strcat(pomocnyBuffer, "\n");
 
     send_message(pomocnyBuffer, prijemca);
-
 }
 
 void spracovanieZruseniaUctu(int newsockfd) {
@@ -348,14 +298,18 @@ void spracovanieZruseniaUctu(int newsockfd) {
     heslo = strtok(NULL, "/0");
 
     int del = zrusenieUctu(login, heslo);
-    char *msg;
-    if (del == 1) {
-        msg = "\n\033[32;1mSERVER: Uspesne zrusenie uctu.\033[0m\n";
-    } else {
-        msg = "\n\033[32;1mSERVER: Neuspesne zrusenie uctu. Nespravne meno alebo heslo.\033[0m\n";
-    }
-    writeToClient(msg,newsockfd);
 
+    char msg[MESSAGE_MAX_DLZKA];
+    bzero(msg, MESSAGE_MAX_DLZKA);
+    if (del == 1) {
+        strcpy(msg, USPESNE_ZRUSENIE);
+
+    } else {
+        strcpy(msg, NEUSPESNE_ZRUSENIE);
+    }
+
+    sifrujRetazec(msg, msg);
+    writeToClient(msg, newsockfd);
 }
 
 void writeToClient(char *buffer, int sockfd) {

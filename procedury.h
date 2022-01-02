@@ -15,6 +15,8 @@ const char* CHATOVANIE = "chatovanie";
 const char* UKONCENIE_CHATOVANIA = "ukoncenie_chatovania";
 const char* ONLINE_UZIVATELIA = "online_uzivatelia";
 const char* EXIT = "exit";
+const char* NOVY_PRIATEL = "novy_priatel";
+const char* ZRUS_PRIATELA = "zrus_priatela";
 
 // SPRAVY OD SERVERA
 const char* USPESNA_REGISTRACIA = "uspesna_registracia";
@@ -35,6 +37,7 @@ const char* ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
 #define HESLO_MAX_DLZKA 60
 #define SPRAVA_MAX_DLZKA 100
 #define KLIENTI_MAX_POCET 10
+#define MAX_POCET_PRIATELOV 10
 const char* MENO_SUBORU = "zaregistrovani_pouzivatelia.txt";
 
 void sifrujRetazec(char *vysledok, char *retazec) {

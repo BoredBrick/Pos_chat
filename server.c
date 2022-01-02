@@ -112,6 +112,8 @@ void *obsluhaKlienta(void *arg) {
 
         } else if(strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
+        } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0){
+            oznamenieOPriatelstve(clientSockFD);
         }
     }
 
@@ -347,7 +349,39 @@ void zoznamOnlinePouzivatelov(int newsockfd) {
     writeToClient(buffer,newsockfd);
 }
 
+void oznamenieOPriatelstve() {
+    char *komu;
+    char *odKoho;
+    komu = strtok(NULL, " ");
+    odKoho = strtok(NULL, "/0");
+    char msg[BUFFER_SIZE];
+    bzero(msg, BUFFER_SIZE);
+
+    strcat(msg, PRIDANIE_PRIATELA);
+    strcat(msg, " ");
+    strcat(msg, odKoho);
 
 
+    sifrujRetazec(msg, msg);
+
+    int socket = najdiSocketPodlaMena(komu);
+    writeToClient(msg, socket);
+}
+
+int najdiSocketPodlaMena(char *meno) {
+    pthread_mutex_lock(&clients_mutex);
+    int sock = 0;
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
+        if (clients[i]) {
+            if (strcmp(clients[i]->name, meno) == 0) {
+                    sock = clients[i]->sockfd;
+                break;
+
+            }
+        }
+    }
+    pthread_mutex_unlock(&clients_mutex);
+    return sock;
+}
 
 

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <malloc.h>
 #include "procedury.h"
 
 #ifndef POS_ZAPOCET_2_KLIENT_H
@@ -14,6 +15,11 @@
 
 char name[LOGIN_MAX_DLZKA];
 int jePrihlaseny = 0;
+
+typedef struct {
+    char name[LOGIN_MAX_DLZKA];
+} priatel;
+priatel *priatelia[MAX_POCET_PRIATELOV];
 
 void writeToServer(char *buffer, int sockfd) {
     int n = write(sockfd, buffer, strlen(buffer));
@@ -319,6 +325,57 @@ void onlineUzivatelia(int sockfd) {
 
     // Poslanie udajov serveru
     writeToServer(buffer, sockfd);
+}
+
+void posliZiadostOPriatelstvo(int sockfd, char* komu) {
+    char buffer[BUFFER_SIZE];
+    bzero(buffer, BUFFER_SIZE);
+    strcat(buffer, NOVY_PRIATEL);
+    strcat(buffer, " ");
+    strcat(buffer, komu);
+    strcat(buffer, " ");
+    strcat(buffer, name);
+
+    sifrujRetazec(buffer, buffer);
+
+    // Poslanie udajov serveru
+    writeToServer(buffer, sockfd);
+}
+
+void posliInfoOOdstraneniZPriatelov(int sockfd, char* komu) {
+    char buffer[BUFFER_SIZE];
+    bzero(buffer, BUFFER_SIZE);
+    strcat(buffer, ZRUS_PRIATELA);
+    strcat(buffer, " ");
+    strcat(buffer, komu);
+    strcat(buffer, " ");
+    strcat(buffer, name);
+
+    sifrujRetazec(buffer, buffer);
+
+    // Poslanie udajov serveru
+    writeToServer(buffer, sockfd);
+}
+
+void pridajDoPolaPriatelov(priatel *priatel) {
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
+        if (!priatelia[i]) {
+            priatelia[i] = priatel;
+            break;
+        }
+    }
+}
+
+void odstranZPolaPriatelov(char *meno) {
+    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
+        if (priatelia[i]) {
+            if (strcmp(priatelia[i]->name, meno) == 0) {
+                priatelia[i] = NULL;
+                free(priatelia[i]);
+                break;
+            }
+        }
+    }
 }
 
 

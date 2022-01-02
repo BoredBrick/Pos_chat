@@ -12,6 +12,7 @@
 #include <pthread.h>
 
 
+
 int sockfd = 0;
 
 void klientovCyklus2(int sockfd) {
@@ -105,6 +106,8 @@ void klientovCyklus(int sockfd) {
                 puts("[2] Ziskaj spravu");
                 puts("[3] Odhlasenie");
                 puts("[4] Online uzivatelia");
+                puts("[5] Pridaj priatela");
+                puts("[6] Odstran priatela");
                 puts("[0] Koniec");
                 printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
                 scanf("%d", &akcia);
@@ -196,9 +199,11 @@ void klientovCyklus(int sockfd) {
 
                         if (akcia == 1) {
                             prebiehaPrihlasenie = prihlasenie(buffer, sockfd);
+                            nacitajZoznamPriatelov();
 
                         } else if (akcia == 2) {
                             prebiehaRegistracia = registracia(buffer, sockfd);
+                            nacitajZoznamPriatelov();
 
                         } else if (akcia == 3) {
                             prebiehaZrusenieUctu = zrusenieUctu(buffer, sockfd);
@@ -219,6 +224,28 @@ void klientovCyklus(int sockfd) {
 
                         }else if(akcia == 4) {
                             onlineUzivatelia(sockfd);
+                        } else if(akcia == 5) {
+                            char menoPridavaneho[LOGIN_MAX_DLZKA];
+                            bzero(menoPridavaneho, LOGIN_MAX_DLZKA);
+                            printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete pridat do priatelov: \033[0m");
+                            scanf("%s", &menoPridavaneho);
+                            getchar();
+                            pridajPriatela(menoPridavaneho);
+                            posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
+                            break;
+
+                        } else if(akcia == 6) {
+                            char menoOdstranovaneho[LOGIN_MAX_DLZKA];
+                            bzero(menoOdstranovaneho, LOGIN_MAX_DLZKA);
+                            printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete odstranit z priatelov: \033[0m");
+                            scanf("%s", &menoOdstranovaneho);
+                            getchar();
+                            odstranPriatela(menoOdstranovaneho);
+                            posliInfoOOdstraneniZPriatelov(sockfd, menoOdstranovaneho);
+                            break;
+
+                        } else {
+                            printf("Nespravne cislo akcie!\n");
                         }
                     }
                     bzero(buffer, BUFFER_SIZE);

@@ -129,7 +129,9 @@ int zrusenieUctu(char* login, char* heslo) {
     }
 }
 
+int najdiSocketPodlaMena(char* meno);
 
+void oznamenieOPriatelstve();
 
 void zoznamOnlinePouzivatelov(int newsockfd);
 

@@ -19,18 +19,17 @@ typedef struct {
     int sockfd;
     int clientID;
     char name[LOGIN_MAX_DLZKA];
-} client_t;
-client_t *clients[KLIENTI_MAX_POCET];
+} client;
+client *klienti[KLIENTI_MAX_POCET];
 
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// DOLEZITE AS FUCK No.1 (add Client to queue)
-void queue_add(client_t *client) {
+void pridajKlienta(client *client) {
     pthread_mutex_lock(&clients_mutex);
 
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
-        if (!clients[i]) {
-            clients[i] = client;
+        if (!klienti[i]) {
+            klienti[i] = client;
             break;
         }
     }
@@ -38,14 +37,13 @@ void queue_add(client_t *client) {
     pthread_mutex_unlock(&clients_mutex);
 }
 
-// DOLEZITE AS FUCK No.2 (remove Client from queue)
-void queue_remove(int clientID) {
+void odoberKlienta(int clientID) {
     pthread_mutex_lock(&clients_mutex);
 
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
-        if (clients[i]) {
-            if (clients[i]->clientID == clientID) {
-                clients[i] = NULL;
+        if (klienti[i]) {
+            if (klienti[i]->clientID == clientID) {
+                klienti[i] = NULL;
                 break;
             }
         }
@@ -55,13 +53,17 @@ void queue_remove(int clientID) {
 
 //posle spravu konkretnemu clientID
 void send_message(char *s, char *komu) {
+//    pthread_mutex_lock(&clients_mutex);
+//    int socket = najdiSocketPodlaMena(komu);
+//    writeToClient(s,socket);
+//    pthread_mutex_unlock(&clients_mutex);
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
-        if (clients[i]) {
-            if (strcmp(clients[i]->name, komu) == 0) {
-                printf("Zapisujem na socket: %d\n", clients[i]->sockfd);
+        if (klienti[i]) {
+            if (strcmp(klienti[i]->name, komu) == 0) {
+                printf("Zapisujem na socket: %d\n", klienti[i]->sockfd);
                 sifrujRetazec(s, s);
-                if (write(clients[i]->sockfd, s, strlen(s)) < 0) {
+                if (write(klienti[i]->sockfd, s, strlen(s)) < 0) {
                     printf("ERROR: write to descriptor failed\n");
                 }
                 break;
@@ -75,14 +77,14 @@ void send_message(char *s, char *komu) {
 void *obsluhaKlienta(void *arg) {
     printf("\033[32;1mSERVER: Bolo vytvorene vlakno pre klienta!\033[0m\n");
     char buffer[BUFFER_SIZE];
+    bzero(buffer,BUFFER_SIZE);
     cli_count++;
 
-    client_t *cli = (client_t *) arg;
+    client *cli = (client *) arg;
 
     printf("\033[32;1mSERVER: Pripojil sa klient so socketom: %d\033[0m\n", cli->sockfd);
 
     int bolExit = 0;
-    int n;
     int clientSockFD = cli->sockfd;
 
     while (bolExit == 0) {
@@ -123,7 +125,7 @@ void *obsluhaKlienta(void *arg) {
     }
 
     close(clientSockFD);
-    queue_remove(cli->clientID);
+    odoberKlienta(cli->clientID);
     free(cli);
     cli_count--;
     pthread_detach(pthread_self());
@@ -178,19 +180,19 @@ int main(int argc, char *argv[]) {
         }
         /*      // CHECK FOR MAX_CLIENTS
          *      if ((cli_count + 1) == MAX_CLIENTS) {
-         *          printf("Maximum clients connected. Connection rejected.\n");
+         *          printf("Maximum klienti connected. Connection rejected.\n");
          *          print_ip_addr(cli_addr);
          *          close(clientSockFD);
          *          continue;
          *      }
          */
         // CLIENT SETTINGS
-        client_t *cli = (client_t *) malloc(sizeof(client_t));
+        client *cli = (client *) malloc(sizeof(client));
         cli->address = cli_addr;
         cli->sockfd = clientSockFD;
         cli->clientID = clientIDstart++;
 
-        queue_add(cli);
+        pridajKlienta(cli);
 
         pthread_t vlakno;
         pthread_create(&vlakno, NULL, &obsluhaKlienta, (void *) cli);
@@ -205,7 +207,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void spracovaniePrihlasenia(int newsockfd) {
+void spracovaniePrihlasenia(int clientSockFD) {
     char *login;
     char *heslo;
 
@@ -219,8 +221,8 @@ void spracovaniePrihlasenia(int newsockfd) {
     if (log == 1) {
 
         for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
-            if (newsockfd == clients[i]->sockfd) {
-                strcpy(clients[i]->name, login);
+            if (clientSockFD == klienti[i]->sockfd) {
+                strcpy(klienti[i]->name, login);
                 break;
             }
         }
@@ -231,10 +233,10 @@ void spracovaniePrihlasenia(int newsockfd) {
 
     }
     sifrujRetazec(msg, msg);
-    writeToClient(msg, newsockfd);
+    writeToClient(msg, clientSockFD);
 }
 
-void spracovanieRegistracie(int newsockfd) {
+void spracovanieRegistracie(int clientSockFD) {
     char *login;
     char *heslo;
     char *potvrdeneHeslo;
@@ -249,8 +251,8 @@ void spracovanieRegistracie(int newsockfd) {
     bzero(msg, MESSAGE_MAX_DLZKA);
     if (reg == 1) {
         for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
-            if (newsockfd == clients[i]->sockfd) {
-                strcpy(clients[i]->name, login);
+            if (clientSockFD == klienti[i]->sockfd) {
+                strcpy(klienti[i]->name, login);
                 break;
             }
         }
@@ -261,11 +263,11 @@ void spracovanieRegistracie(int newsockfd) {
 
     }
     sifrujRetazec(msg, msg);
-    writeToClient(msg, newsockfd);
+    writeToClient(msg, clientSockFD);
 
 }
 
-void spracovanieChatovania(int newsockfd) {
+void spracovanieChatovania(int clientSockFD) {
     // mojeMeno admin text spravy
     // ODOSIELATEL PRIJIMATEL SPRAVA
 
@@ -284,7 +286,7 @@ void spracovanieChatovania(int newsockfd) {
     bzero(msg, MESSAGE_MAX_DLZKA);
     strcpy(msg, SPRAVA_ODOSIELATELOVI);
     sifrujRetazec(msg, msg);
-    writeToClient(msg, newsockfd);
+    writeToClient(msg, clientSockFD);
 
     char pomocnyBuffer[BUFFER_SIZE];
     bzero(pomocnyBuffer, BUFFER_SIZE);
@@ -294,11 +296,10 @@ void spracovanieChatovania(int newsockfd) {
     strcat(pomocnyBuffer, " ");
     strcat(pomocnyBuffer, sprava);
     strcat(pomocnyBuffer, "\n");
-
     send_message(pomocnyBuffer, prijemca);
 }
 
-void spracovanieZruseniaUctu(int newsockfd) {
+void spracovanieZruseniaUctu(int clientSockFD) {
     char *login;
     char *heslo;
 
@@ -317,7 +318,7 @@ void spracovanieZruseniaUctu(int newsockfd) {
     }
 
     sifrujRetazec(msg, msg);
-    writeToClient(msg, newsockfd);
+    writeToClient(msg, clientSockFD);
 }
 
 void writeToClient(char *buffer, int sockfd) {
@@ -335,7 +336,7 @@ void listenToClient(char *buffer, int sockfd) {
     }
 }
 
-void zoznamOnlinePouzivatelov(int newsockfd) {
+void zoznamOnlinePouzivatelov(int clientSockFD) {
     char buffer[BUFFER_SIZE];
     bzero(buffer, 256);
     strcat(buffer, ZOZNAM_ONLINE_UZIVATELOV);
@@ -343,15 +344,15 @@ void zoznamOnlinePouzivatelov(int newsockfd) {
 
     int pocetOnline = 0;
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
-        if (clients[i] && clients[i]->name[0] != 0) {
+        if (klienti[i] && klienti[i]->name[0] != 0) {
             pocetOnline++;
             strcat(buffer, " ");
-            strcat(buffer, clients[i]->name);
+            strcat(buffer, klienti[i]->name);
         }
     }
     buffer[25] = pocetOnline + '0';
     sifrujRetazec(buffer, buffer);
-    writeToClient(buffer, newsockfd);
+    writeToClient(buffer, clientSockFD);
 }
 
 void oznamenieOPriatelstve() {
@@ -394,9 +395,9 @@ int najdiSocketPodlaMena(char *meno) {
     pthread_mutex_lock(&clients_mutex);
     int sock = 0;
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
-        if (clients[i]) {
-            if (strcmp(clients[i]->name, meno) == 0) {
-                sock = clients[i]->sockfd;
+        if (klienti[i]) {
+            if (strcmp(klienti[i]->name, meno) == 0) {
+                sock = klienti[i]->sockfd;
                 break;
 
             }

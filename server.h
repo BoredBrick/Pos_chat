@@ -17,20 +17,25 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
 
     FILE *subor;
     subor = fopen(MENO_SUBORU, "a+");
-    char pomocna[512];
-
+    char pomocna[BUFFER_SIZE];
+    bzero(pomocna, BUFFER_SIZE);
+    char suborLogin[BUFFER_SIZE];
+    bzero(suborLogin, BUFFER_SIZE);
     int jeUzZaregistrovany = 0;
 
-    while (fscanf(subor, " %s", pomocna) == 1) {
+    while (fscanf(subor, "%s %s", suborLogin, pomocna) == 2) {
         if (strcmp(pomocna, login) == 0) {
             jeUzZaregistrovany = 1;
             break;
         }
+        bzero(pomocna, BUFFER_SIZE);
+        bzero(suborLogin, BUFFER_SIZE);
+
     }
 
     if (jeUzZaregistrovany == 0) {
         if (strcmp(heslo, potvrdHeslo) == 0) {
-            char *pomPassword = malloc(sizeof (char)*strlen(heslo));
+            char *pomPassword = malloc(sizeof(char) * strlen(heslo));
             sifrujRetazec(pomPassword, heslo);
             fprintf(subor, login);
             fprintf(subor, " ");
@@ -55,22 +60,26 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
 }
 
 int prihlasenie(char *login, char *heslo) {
-    char *pomPassword = malloc(sizeof (char)*strlen(heslo));
+    char pomPassword[HESLO_MAX_DLZKA];
     FILE *subor;
     subor = fopen(MENO_SUBORU, "r");
     int foundLogin = 0;
-    char loginFile[30];
-    char hesloFile[30];
+    char loginFile[LOGIN_MAX_DLZKA];
+    char hesloFile[HESLO_MAX_DLZKA];
     while (fscanf(subor, " %s %s", loginFile, hesloFile) == 2) {
         odsifrujRetazec(pomPassword, hesloFile);
         if ((strcmp(loginFile, login) == 0) && strcmp(pomPassword, heslo) == 0) {
             foundLogin = 1;
             break;
         }
+        bzero(pomPassword,30);
+
+        bzero(loginFile,LOGIN_MAX_DLZKA);
+        bzero(hesloFile,HESLO_MAX_DLZKA);
+
     }
 
     fclose(subor);
-    free(pomPassword);
     if (foundLogin == 1) {
         printf("\n\033[32;1mSERVER: Pouzivatel %s sa prihlasil\033[0m\n", loginFile);
         return 1;
@@ -81,11 +90,10 @@ int prihlasenie(char *login, char *heslo) {
 
 }
 
-int zrusenieUctu(char* login, char* heslo) {
-    char *pomPassword = malloc(sizeof (char)*strlen(heslo));
+int zrusenieUctu(char *login, char *heslo) {
+    char pomPassword[HESLO_MAX_DLZKA];
     FILE *subor, *novySubor;
-    subor = fopen(MENO_SUBORU, "a+");
-
+    subor = fopen(MENO_SUBORU, "r");
     int foundLogin = 0;
     char loginFile[LOGIN_MAX_DLZKA];
     char hesloFile[HESLO_MAX_DLZKA];
@@ -95,10 +103,14 @@ int zrusenieUctu(char* login, char* heslo) {
             foundLogin = 1;
             break;
         }
+        bzero(pomPassword,30);
+
+        bzero(loginFile,LOGIN_MAX_DLZKA);
+        bzero(hesloFile,HESLO_MAX_DLZKA);
+
     }
 
     fclose(subor);
-    free(pomPassword);
 
     if (foundLogin == 1) {
         subor = fopen(MENO_SUBORU, "a+");
@@ -136,7 +148,7 @@ int zrusenieUctu(char* login, char* heslo) {
     }
 }
 
-int najdiSocketPodlaMena(char* meno);
+int najdiSocketPodlaMena(char *meno);
 
 void oznamenieOPriatelstve();
 
@@ -148,9 +160,9 @@ void spracovanieRegistracie(int newsockfd);
 
 void spracovaniePrihlasenia(int newsockfd);
 
-void spracovanieChatovania(int newsockfd);
+void spracovanieChatovania(int clientSockFD);
 
-void spracovanieZruseniaUctu(int newsockfd);
+void spracovanieZruseniaUctu(int clientSockFD);
 
 void writeToClient(char buffer[], int sockfd);
 

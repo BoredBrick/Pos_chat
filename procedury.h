@@ -8,28 +8,30 @@
 #endif //POS_znakAT_PROCEDURY_H
 
 // SPRAVY OD KLIENTA
-const char* PRIHLASENIE = "prihlasenie";
-const char* REGISTRACIA = "registracia";
-const char* ZRUSENIE_UCTU = "zrusenie_uctu";
-const char* CHATOVANIE = "chatovanie";
-const char* UKONCENIE_CHATOVANIA = "ukoncenie_chatovania";
-const char* ONLINE_UZIVATELIA = "online_uzivatelia";
-const char* EXIT = "exit";
-const char* NOVY_PRIATEL = "novy_priatel";
-const char* ZRUS_PRIATELA = "zrus_priatela";
+const char *PRIHLASENIE = "prihlasenie";
+const char *REGISTRACIA = "registracia";
+const char *ZRUSENIE_UCTU = "zrusenie_uctu";
+const char *CHATOVANIE = "chatovanie";
+const char *UKONCENIE_CHATOVANIA = "ukoncenie_chatovania";
+const char *ONLINE_UZIVATELIA = "online_uzivatelia";
+const char *EXIT = "exit";
+const char *NOVY_PRIATEL = "novy_priatel";
+const char *ZRUS_PRIATELA = "zrus_priatela";
+const char *BREAK = "break";
+const char *CONTINUE = "continue";
 
 // SPRAVY OD SERVERA
-const char* USPESNA_REGISTRACIA = "uspesna_registracia";
-const char* NEUSPESNA_REGISTRACIA = "neuspesna_registracia";
-const char* USPESNE_PRIHLASENIE = "uspesne_prihlasenie";
-const char* NEUSPESNE_PRIHLASENIE = "neuspesne_prihlasenie";
-const char* USPESNE_ZRUSENIE = "uspesne_zrusenie";
-const char* NEUSPESNE_ZRUSENIE = "neuspesne_zrusenie";
-const char* SPRAVA_ODOSIELATELOVI = "sprava_odosielatelovi";
-const char* SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
-const char* ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
-const char* PRIDANIE_PRIATELA = "pridanie_priatela";
-const char* ODSTRANENIE_PRIATELA = "odstranenie_priatela";
+const char *USPESNA_REGISTRACIA = "uspesna_registracia";
+const char *NEUSPESNA_REGISTRACIA = "neuspesna_registracia";
+const char *USPESNE_PRIHLASENIE = "uspesne_prihlasenie";
+const char *NEUSPESNE_PRIHLASENIE = "neuspesne_prihlasenie";
+const char *USPESNE_ZRUSENIE = "uspesne_zrusenie";
+const char *NEUSPESNE_ZRUSENIE = "neuspesne_zrusenie";
+const char *SPRAVA_ODOSIELATELOVI = "sprava_odosielatelovi";
+const char *SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
+const char *ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
+const char *PRIDANIE_PRIATELA = "pridanie_priatela";
+const char *ODSTRANENIE_PRIATELA = "odstranenie_priatela";
 
 // INE
 #define KLUC 5
@@ -40,7 +42,7 @@ const char* ODSTRANENIE_PRIATELA = "odstranenie_priatela";
 #define SPRAVA_MAX_DLZKA 100
 #define KLIENTI_MAX_POCET 10
 #define MAX_POCET_PRIATELOV 10
-const char* MENO_SUBORU = "zaregistrovani_pouzivatelia.txt";
+const char *MENO_SUBORU = "zaregistrovani_pouzivatelia.txt";
 
 void sifrujRetazec(char *vysledok, char *retazec) {
     for (int i = 0; retazec[i] != '\0'; ++i) {

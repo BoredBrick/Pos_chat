@@ -319,8 +319,9 @@ void klientovCyklus2(int sockfd);
 
 void onlineUzivatelia(int sockfd) {
     char buffer[BUFFER_SIZE];
-    bzero(buffer,BUFFER_SIZE);
+    bzero(buffer, BUFFER_SIZE);
     strcat(buffer, ONLINE_UZIVATELIA);
+
     sifrujRetazec(buffer, buffer);
 
     // Poslanie udajov serveru
@@ -378,4 +379,107 @@ void odstranZPolaPriatelov(char *meno) {
     }
 }
 
+void nacitajZoznamPriatelov() {
+    FILE *suborPriatelia, *suborZaregistrovani;
+
+    char nazovSuboru[BUFFER_SIZE];
+    bzero(nazovSuboru, BUFFER_SIZE);
+    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, ".txt");
+
+    suborPriatelia = fopen(nazovSuboru, "a+");
+    suborZaregistrovani = fopen(MENO_SUBORU, "a+");
+
+    char loginPriatelia[LOGIN_MAX_DLZKA];
+    char loginRegistrovani[LOGIN_MAX_DLZKA];
+
+    while (fscanf(suborPriatelia, " %s", loginPriatelia) == 1) {
+        while (fscanf(suborZaregistrovani, " %s", loginRegistrovani) == 1) {
+            if (strcmp(loginPriatelia, loginRegistrovani) == 0) {
+                priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
+                strcpy(novyPriatel->name,loginPriatelia);
+                pridajDoPolaPriatelov(novyPriatel);
+            }
+        }
+    }
+
+    fclose(suborPriatelia);
+    fclose(suborZaregistrovani);
+}
+
+void pridajPriatela(char* menoPridavaneho) {
+    FILE *suborPriatelia;
+
+    char nazovSuboru[BUFFER_SIZE];
+    bzero(nazovSuboru, BUFFER_SIZE);
+    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, ".txt");
+
+    suborPriatelia = fopen(nazovSuboru, "a+");
+
+    int uzJeVPriateloch = 0;
+    char loginPriatelia[LOGIN_MAX_DLZKA];
+
+    while (fscanf(suborPriatelia, " %s", loginPriatelia) == 1) {
+        if (strcmp(loginPriatelia, menoPridavaneho) == 0) {
+            uzJeVPriateloch = 1;
+            break;
+        }
+    }
+
+    if (!uzJeVPriateloch) {
+        priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
+        strcpy(novyPriatel->name,menoPridavaneho);
+        pridajDoPolaPriatelov(novyPriatel);
+        fprintf(suborPriatelia, menoPridavaneho);
+        fprintf(suborPriatelia, "\n");
+    }
+
+    fclose(suborPriatelia);
+
+}
+
+void odstranPriatela(char* menoOdstranovaneho) {
+    FILE *suborPriatelia, *novySubor;
+
+    char nazovSuboru[BUFFER_SIZE];
+    bzero(nazovSuboru, BUFFER_SIZE);
+    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, ".txt");
+
+    suborPriatelia = fopen(nazovSuboru, "a+");
+
+    int jeVPriateloch = 0;
+    char loginPriatelia[LOGIN_MAX_DLZKA];
+
+    while (fscanf(suborPriatelia, " %s", loginPriatelia) == 1) {
+        if (strcmp(loginPriatelia, menoOdstranovaneho) == 0) {
+            jeVPriateloch = 1;
+            break;
+        }
+    }
+
+    fclose(suborPriatelia);
+
+    if (jeVPriateloch) {
+        odstranZPolaPriatelov(menoOdstranovaneho);
+        suborPriatelia = fopen(nazovSuboru, "a+");
+        novySubor = fopen("novy_subor.txt", "a+");
+        char logPriatelia[LOGIN_MAX_DLZKA];
+        while (fscanf(suborPriatelia, " %s", logPriatelia) == 1) {
+            if (strcmp(logPriatelia, menoOdstranovaneho) != 0) {
+                fprintf(novySubor, logPriatelia);
+                fprintf(novySubor, "\n");
+            }
+        }
+        fclose(suborPriatelia);
+        fclose(novySubor);
+        if (remove(nazovSuboru) != 0) {
+            printf("Nepodarilo sa odstranit subor\n");
+        }
+        if (rename("novy_subor.txt", nazovSuboru) != 0) {
+            printf("Nepodarilo sa premenovat subor\n");
+        }
+    }
+}
 

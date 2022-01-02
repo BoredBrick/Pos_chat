@@ -28,6 +28,8 @@ const char* NEUSPESNE_ZRUSENIE = "neuspesne_zrusenie";
 const char* SPRAVA_ODOSIELATELOVI = "sprava_odosielatelovi";
 const char* SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
 const char* ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
+const char* PRIDANIE_PRIATELA = "pridanie_priatela";
+const char* ODSTRANENIE_PRIATELA = "odstranenie_priatela";
 
 // INE
 #define KLUC 5

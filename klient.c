@@ -89,6 +89,7 @@ void klientovCyklus(int sockfd) {
     char buffer[BUFFER_SIZE];
     char msgBuffer[BUFFER_SIZE];
 
+
     while (1) {
         int akcia = -1;
         if (!jePrihlaseny) {
@@ -190,6 +191,20 @@ void klientovCyklus(int sockfd) {
                                 printf("%s \n", meno);
                             }
                         }
+                    } else if (strcmp(prikaz, PRIDANIE_PRIATELA) == 0) {
+                        char *ziadostOd;
+                        ziadostOd = strtok(NULL, "\0");
+                        priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
+                        strcpy(novyPriatel->name, ziadostOd);
+                        pridajDoPolaPriatelov(novyPriatel);
+                        printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas pridal do priatelov!\033[0m\n", ziadostOd);
+
+                    } else if (strcmp(prikaz, ODSTRANENIE_PRIATELA) == 0) {
+                        char *ziadostOd;
+                        ziadostOd = strtok(NULL, "\0");
+                        odstranZPolaPriatelov(ziadostOd);
+                        printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas odstranil z priatelov!\033[0m\n", ziadostOd);
+
                     }
 
                     bzero(msgBuffer, BUFFER_SIZE);

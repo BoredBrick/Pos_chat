@@ -311,5 +311,14 @@ void klientovCyklus(int sockfd);
 
 void klientovCyklus2(int sockfd);
 
+void onlineUzivatelia(int sockfd) {
+    char buffer[BUFFER_SIZE];
+    bzero(buffer,BUFFER_SIZE);
+    strcat(buffer, ONLINE_UZIVATELIA);
+    sifrujRetazec(buffer, buffer);
+
+    // Poslanie udajov serveru
+    writeToServer(buffer, sockfd);
+}
 
 

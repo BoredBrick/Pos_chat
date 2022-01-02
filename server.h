@@ -129,6 +129,10 @@ int zrusenieUctu(char* login, char* heslo) {
     }
 }
 
+
+
+void zoznamOnlinePouzivatelov(int newsockfd);
+
 void spracovanieRegistracie(int newsockfd);
 
 void spracovaniePrihlasenia(int newsockfd);

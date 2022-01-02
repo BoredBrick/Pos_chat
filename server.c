@@ -3,7 +3,6 @@
 //
 
 #include "server.h"
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -111,6 +110,8 @@ void *obsluhaKlienta(void *arg) {
         } else if (strcmp(typSpravy, UKONCENIE_CHATOVANIA) == 0) {
             printf("Ukoncenie chatovania\n");
 
+        } else if(strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
+            zoznamOnlinePouzivatelov(clientSockFD);
         }
     }
 
@@ -325,6 +326,25 @@ void listenToClient(char *buffer, int sockfd) {
     if (n < 0) {
         perror("Error reading from socket");
     }
+}
+
+void zoznamOnlinePouzivatelov(int newsockfd) {
+    char buffer[BUFFER_SIZE];
+    bzero(buffer, 256);
+    strcat(buffer, ZOZNAM_ONLINE_UZIVATELOV);
+    strcat(buffer, "  ");
+
+    int pocetOnline = 0;
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
+        if (clients[i] && clients[i]->name[0] != 0) {
+            pocetOnline++;
+            strcat(buffer, " ");
+            strcat(buffer, clients[i]->name);
+        }
+    }
+    buffer[25] = pocetOnline +'0';
+    sifrujRetazec(buffer,buffer);
+    writeToClient(buffer,newsockfd);
 }
 
 

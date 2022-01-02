@@ -101,9 +101,10 @@ void klientovCyklus(int sockfd) {
             getchar();
         } else {
             if (prebiehaChat == 0) {
-                puts("[1] Posli spravu");
+                puts("\n[1] Posli spravu");
                 puts("[2] Ziskaj spravu");
                 puts("[3] Odhlasenie");
+                puts("[4] Online uzivatelia");
                 puts("[0] Koniec");
                 printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
                 scanf("%d", &akcia);
@@ -170,6 +171,22 @@ void klientovCyklus(int sockfd) {
                         printf("Nova sprava od %s: %s\n", odosielatel, sprava);
                         fflush(stdout);
 
+                    } else if(strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {
+                        int pocetOnline = atoi(strtok(NULL, " "));
+                        if(pocetOnline <= 1) {
+                            printf("Okrem vas nie je online ziadny iny pouzivatel\n");
+                            break;
+                        } else {
+                            printf("Nasledujuci pouzivatelia su online: \n");
+                        }
+                        for (int i = 0; i < pocetOnline; ++i) {
+                            char* meno = strtok(NULL, " ");
+                            if(strcmp(meno,name) == 0) {
+                                printf("Vy: %s\n", meno);
+                            }else {
+                                printf("%s \n", meno);
+                            }
+                        }
                     }
 
                     bzero(msgBuffer, BUFFER_SIZE);
@@ -200,6 +217,8 @@ void klientovCyklus(int sockfd) {
                             jePrihlaseny = 0;
                             break;
 
+                        }else if(akcia == 4) {
+                            onlineUzivatelia(sockfd);
                         }
                     }
                     bzero(buffer, BUFFER_SIZE);
@@ -209,6 +228,9 @@ void klientovCyklus(int sockfd) {
         //}
     }
 }
+
+
+
 
 int main(int argc, char *argv[]) {
     setlinebuf(stdout);

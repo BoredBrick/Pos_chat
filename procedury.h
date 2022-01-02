@@ -13,6 +13,7 @@ const char* REGISTRACIA = "registracia";
 const char* ZRUSENIE_UCTU = "zrusenie_uctu";
 const char* CHATOVANIE = "chatovanie";
 const char* UKONCENIE_CHATOVANIA = "ukoncenie_chatovania";
+const char* ONLINE_UZIVATELIA = "online_uzivatelia";
 const char* EXIT = "exit";
 
 // SPRAVY OD SERVERA
@@ -24,6 +25,7 @@ const char* USPESNE_ZRUSENIE = "uspesne_zrusenie";
 const char* NEUSPESNE_ZRUSENIE = "neuspesne_zrusenie";
 const char* SPRAVA_ODOSIELATELOVI = "sprava_odosielatelovi";
 const char* SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
+const char* ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
 
 // INE
 #define KLUC 5

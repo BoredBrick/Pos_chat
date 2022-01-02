@@ -15,6 +15,7 @@
 
 char name[LOGIN_MAX_DLZKA];
 int jePrihlaseny = 0;
+int pocetPriatelov = 0;
 
 typedef struct {
     char name[LOGIN_MAX_DLZKA];
@@ -362,6 +363,7 @@ void pridajDoPolaPriatelov(priatel *priatel) {
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (!priatelia[i]) {
             priatelia[i] = priatel;
+            pocetPriatelov++;
             break;
         }
     }
@@ -373,6 +375,7 @@ void odstranZPolaPriatelov(char *meno) {
             if (strcmp(priatelia[i]->name, meno) == 0) {
                 priatelia[i] = NULL;
                 free(priatelia[i]);
+                pocetPriatelov--;
                 break;
             }
         }
@@ -479,6 +482,18 @@ void odstranPriatela(char* menoOdstranovaneho) {
         }
         if (rename("novy_subor.txt", nazovSuboru) != 0) {
             printf("Nepodarilo sa premenovat subor\n");
+        }
+    }
+}
+
+void vypisZoznamPriatelov() {
+    printf("\n\033[35;1mKLIENT: Pocet priatelov: %d \033[0m\n", pocetPriatelov);
+    printf("\033[35;1mKLIENT: Zoznam priatelov: \033[0m\n");
+    int pocitadlo = 0;
+    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
+        if (priatelia[i]) {
+            pocitadlo++;
+            printf("\t\t%d. %s\n", pocitadlo, priatelia[i]->name);
         }
     }
 }

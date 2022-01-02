@@ -122,6 +122,13 @@ int zrusenieUctu(char* login, char* heslo) {
         if (rename("novy_subor.txt", MENO_SUBORU) != 0) {
             printf("Nepodarilo sa premenovat subor\n");
         }
+
+        char nazovSuboru[BUFFER_SIZE];
+        strcat(nazovSuboru, login);
+        strcat(nazovSuboru, ".txt");
+        if (remove(nazovSuboru) != 0) {
+            printf("Nepodarilo sa odstranit subor\n");
+        }
         return 1;
     } else {
         printf("\n\033[32;1mSERVER: Nespravne meno alebo heslo\033[0m\n");
@@ -132,6 +139,8 @@ int zrusenieUctu(char* login, char* heslo) {
 int najdiSocketPodlaMena(char* meno);
 
 void oznamenieOPriatelstve();
+
+void oznamenieOOdstraneniZPriatelov();
 
 void zoznamOnlinePouzivatelov(int newsockfd);
 

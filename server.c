@@ -110,10 +110,15 @@ void *obsluhaKlienta(void *arg) {
         } else if (strcmp(typSpravy, UKONCENIE_CHATOVANIA) == 0) {
             printf("Ukoncenie chatovania\n");
 
-        } else if(strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
+        } else if (strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
-        } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0){
-            oznamenieOPriatelstve(clientSockFD);
+            printf("SOM TU\n");
+        } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0) {
+            oznamenieOPriatelstve();
+
+        } else if (strcmp(typSpravy, ZRUS_PRIATELA) == 0) {
+            oznamenieOOdstraneniZPriatelov();
+
         }
     }
 
@@ -344,9 +349,9 @@ void zoznamOnlinePouzivatelov(int newsockfd) {
             strcat(buffer, clients[i]->name);
         }
     }
-    buffer[25] = pocetOnline +'0';
-    sifrujRetazec(buffer,buffer);
-    writeToClient(buffer,newsockfd);
+    buffer[25] = pocetOnline + '0';
+    sifrujRetazec(buffer, buffer);
+    writeToClient(buffer, newsockfd);
 }
 
 void oznamenieOPriatelstve() {
@@ -361,6 +366,23 @@ void oznamenieOPriatelstve() {
     strcat(msg, " ");
     strcat(msg, odKoho);
 
+    sifrujRetazec(msg, msg);
+
+    int socket = najdiSocketPodlaMena(komu);
+    writeToClient(msg, socket);
+}
+
+void oznamenieOOdstraneniZPriatelov() {
+    char *komu;
+    char *odKoho;
+    komu = strtok(NULL, " ");
+    odKoho = strtok(NULL, "/0");
+    char msg[BUFFER_SIZE];
+    bzero(msg, BUFFER_SIZE);
+
+    strcat(msg, ODSTRANENIE_PRIATELA);
+    strcat(msg, " ");
+    strcat(msg, odKoho);
 
     sifrujRetazec(msg, msg);
 
@@ -374,7 +396,7 @@ int najdiSocketPodlaMena(char *meno) {
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (clients[i]) {
             if (strcmp(clients[i]->name, meno) == 0) {
-                    sock = clients[i]->sockfd;
+                sock = clients[i]->sockfd;
                 break;
 
             }

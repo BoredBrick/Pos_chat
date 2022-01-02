@@ -12,7 +12,6 @@
 #include <pthread.h>
 
 
-
 int sockfd = 0;
 
 void klientovCyklus2(int sockfd) {
@@ -109,6 +108,7 @@ void klientovCyklus(int sockfd) {
                 puts("[4] Online uzivatelia");
                 puts("[5] Pridaj priatela");
                 puts("[6] Odstran priatela");
+                puts("[7] Zoznam priatelov");
                 puts("[0] Koniec");
                 printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
                 scanf("%d", &akcia);
@@ -175,34 +175,32 @@ void klientovCyklus(int sockfd) {
                         printf("Nova sprava od %s: %s\n", odosielatel, sprava);
                         fflush(stdout);
 
-                    } else if(strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {
+                    } else if (strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {
                         int pocetOnline = atoi(strtok(NULL, " "));
-                        if(pocetOnline <= 1) {
+                        if (pocetOnline <= 1) {
                             printf("Okrem vas nie je online ziadny iny pouzivatel\n");
                             break;
                         } else {
                             printf("Nasledujuci pouzivatelia su online: \n");
                         }
                         for (int i = 0; i < pocetOnline; ++i) {
-                            char* meno = strtok(NULL, " ");
-                            if(strcmp(meno,name) == 0) {
+                            char *meno = strtok(NULL, " ");
+                            if (strcmp(meno, name) == 0) {
                                 printf("Vy: %s\n", meno);
-                            }else {
+                            } else {
                                 printf("%s \n", meno);
                             }
                         }
                     } else if (strcmp(prikaz, PRIDANIE_PRIATELA) == 0) {
                         char *ziadostOd;
                         ziadostOd = strtok(NULL, "\0");
-                        priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
-                        strcpy(novyPriatel->name, ziadostOd);
-                        pridajDoPolaPriatelov(novyPriatel);
+                        pridajPriatela(ziadostOd);
                         printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas pridal do priatelov!\033[0m\n", ziadostOd);
 
                     } else if (strcmp(prikaz, ODSTRANENIE_PRIATELA) == 0) {
                         char *ziadostOd;
                         ziadostOd = strtok(NULL, "\0");
-                        odstranZPolaPriatelov(ziadostOd);
+                        odstranPriatela(ziadostOd);
                         printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas odstranil z priatelov!\033[0m\n", ziadostOd);
 
                     }
@@ -237,9 +235,9 @@ void klientovCyklus(int sockfd) {
                             jePrihlaseny = 0;
                             break;
 
-                        }else if(akcia == 4) {
+                        } else if (akcia == 4) {
                             onlineUzivatelia(sockfd);
-                        } else if(akcia == 5) {
+                        } else if (akcia == 5) {
                             char menoPridavaneho[LOGIN_MAX_DLZKA];
                             bzero(menoPridavaneho, LOGIN_MAX_DLZKA);
                             printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete pridat do priatelov: \033[0m");
@@ -249,7 +247,7 @@ void klientovCyklus(int sockfd) {
                             posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
                             break;
 
-                        } else if(akcia == 6) {
+                        } else if (akcia == 6) {
                             char menoOdstranovaneho[LOGIN_MAX_DLZKA];
                             bzero(menoOdstranovaneho, LOGIN_MAX_DLZKA);
                             printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete odstranit z priatelov: \033[0m");
@@ -259,6 +257,9 @@ void klientovCyklus(int sockfd) {
                             posliInfoOOdstraneniZPriatelov(sockfd, menoOdstranovaneho);
                             break;
 
+                        } else if (akcia == 7) {
+                            vypisZoznamPriatelov();
+                            break;
                         } else {
                             printf("Nespravne cislo akcie!\n");
                         }
@@ -270,8 +271,6 @@ void klientovCyklus(int sockfd) {
         //}
     }
 }
-
-
 
 
 int main(int argc, char *argv[]) {

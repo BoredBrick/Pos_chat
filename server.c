@@ -74,13 +74,13 @@ void send_message(char *s, char *komu) {
 
 //funkcia, ktora bude vo vlakne cakat na to, pokial nedostane spravu od klienta, potom ju spracuje
 void *obsluhaKlienta(void *arg) {
-    printf("Bolo vytvorene vlakno pre klienta!\n");
+    printf("\033[32;1mSERVER: Bolo vytvorene vlakno pre klienta!\033[0m\n");
     char buffer[BUFFER_SIZE];
     cli_count++;
 
     client_t *cli = (client_t *) arg;
 
-    printf("Pripojil sa klient so socketom: %d\n", cli->sockfd);
+    printf("\033[32;1mSERVER: Pripojil sa klient so socketom: %d\033[0m\n", cli->sockfd);
 
     int bolExit = 0;
     int n;

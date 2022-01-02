@@ -141,27 +141,27 @@ void klientovCyklus(int sockfd) {
                     prikaz = strtok(msgBuffer, " "); // vyseknutie prikazu zo serveru
 
                     if (strcmp(prikaz, NEUSPESNA_REGISTRACIA) == 0) {
-                        puts("Registracia bola neuspesna!");
+                        puts("\n\033[35;1mKLIENT: Registracia bola neuspesna!\033[0m\n");
 
                     } else if (strcmp(prikaz, USPESNA_REGISTRACIA) == 0) {
                         jePrihlaseny = 1;
-                        puts("Registracia prebehla uspesne!");
+                        puts("\n\033[35;1mKLIENT: Registracia prebehla uspesne!\033[0m\n");
 
                     } else if (strcmp(prikaz, NEUSPESNE_PRIHLASENIE) == 0) {
-                        puts("Prihlasenie bolo neuspesne!");
+                        puts("\n\033[35;1mKLIENT: Prihlasenie bolo neuspesne!\033[0m\n");
 
                     } else if (strcmp(prikaz, USPESNE_PRIHLASENIE) == 0) {
                         jePrihlaseny = 1;
-                        puts("Prihlasenie prebehlo uspesne!");
+                        puts("\n\033[35;1mKLIENT: Prihlasenie prebehlo uspesne!\033[0m\n");
 
                     } else if (strcmp(prikaz, NEUSPESNE_ZRUSENIE) == 0) {
-                        puts("Zrusenie uctu bolo neuspesne!");
+                        puts("\n\033[35;1mKLIENT: Zrusenie uctu bolo neuspesne!\033[0m\n");
 
                     } else if (strcmp(prikaz, USPESNE_ZRUSENIE) == 0) {
-                        puts("Zrusenie uctu prebehlo uspesne!");
+                        puts("\n\033[35;1mKLIENT: Zrusenie uctu prebehlo uspesne!\033[0m\n");
 
                     } else if (strcmp(prikaz, SPRAVA_ODOSIELATELOVI) == 0) {
-                        puts("Sprava bola prijata!");
+                        puts("\n\033[35;1mKLIENT: Sprava bola prijata serverom na spracovanie!\033[0m\n");
 
                     } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
                         odosielatel = strtok(NULL, " ");

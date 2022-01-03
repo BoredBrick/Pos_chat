@@ -583,8 +583,12 @@ void pridaniePriatelaKlient(int sockfd) {
     printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete pridat do priatelov: \033[0m");
     scanf("%s", &menoPridavaneho);
     getchar();
-    pridajPriatela(menoPridavaneho);
-    posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
+    if(strcmp(name, menoPridavaneho) != 0) {
+        pridajPriatela(menoPridavaneho);
+        posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
+    } else {
+        printf("\n\033[35;1mKLIENT: Nemozete byt priatel sam so sebou.\033[0m\n");
+    }
 }
 
 void odstraneniePriatelaKlient(int sockfd) {
@@ -595,6 +599,19 @@ void odstraneniePriatelaKlient(int sockfd) {
     getchar();
     odstranPriatela(menoOdstranovaneho);
     posliInfoOOdstraneniZPriatelov(sockfd, menoOdstranovaneho);
+}
+
+int jePriatel(char *meno) {
+    int ret = 0;
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
+        if (priatelia[i]) {
+            if (strcmp(priatelia[i]->name, meno) == 0) {
+                ret = 1;
+                break;
+            }
+        }
+    }
+    return ret;
 }
 
 void spracujPrikazZoServera(char *prikaz) {

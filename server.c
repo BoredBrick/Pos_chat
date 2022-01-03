@@ -61,7 +61,7 @@ void send_message(char *s, char *komu) {
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
         if (klienti[i]) {
             if (strcmp(klienti[i]->name, komu) == 0) {
-                printf("Zapisujem na socket: %d\n", klienti[i]->sockfd);
+                printf("\n\033[34;1mSERVER Zapisujem na socket:\033[0m %d\n", klienti[i]->sockfd);
                 sifrujRetazec(s, s);
                 if (write(klienti[i]->sockfd, s, strlen(s)) < 0) {
                     printf("ERROR: write to descriptor failed\n");
@@ -75,14 +75,14 @@ void send_message(char *s, char *komu) {
 
 //funkcia, ktora bude vo vlakne cakat na to, pokial nedostane spravu od klienta, potom ju spracuje
 void *obsluhaKlienta(void *arg) {
-    printf("\033[32;1mSERVER: Bolo vytvorene vlakno pre klienta!\033[0m\n");
+    printf("\n\033[34;1mSERVER: Bolo vytvorene vlakno pre klienta!\033[0m\n");
     char buffer[BUFFER_SIZE];
     bzero(buffer, BUFFER_SIZE);
     cli_count++;
 
     client *cli = (client *) arg;
 
-    printf("\033[32;1mSERVER: Pripojil sa klient so socketom: %d\033[0m\n", cli->sockfd);
+    printf("\033[34;1mSERVER: Pripojil sa klient so socketom:\033[0m %d\n", cli->sockfd);
 
     int bolExit = 0;
     int clientSockFD = cli->sockfd;
@@ -110,7 +110,7 @@ void *obsluhaKlienta(void *arg) {
             bolExit = 1;
 
         } else if (strcmp(typSpravy, UKONCENIE_CHATOVANIA) == 0) {
-            printf("Ukoncenie chatovania\n");
+            printf("\n\033[32;1mSERVER: Pouzivatel\033[0m %s \033[32;1mukoncil chat.\033[0m\n", cli->name);
 
         } else if (strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 
 
     // Tento vypis dat skorej asi pod LISTENING
-    printf("\033[32;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
+    printf("\033[33;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
 
     //LISTENING
     listen(sockfd, 5);
@@ -279,7 +279,7 @@ void spracovanieChatovania(int clientSockFD) {
     //text spravy
     char *sprava;
     sprava = strtok(NULL, "/0");
-    printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s\n", sprava);
+    printf("\n\033[32;1mSERVER: Bola prijata sprava:\033[0m %s \033[32;1murcena pouzivatelovi\033[0m %s\n", sprava, prijemca);
 
     char msg[MESSAGE_MAX_DLZKA];
     bzero(msg, MESSAGE_MAX_DLZKA);

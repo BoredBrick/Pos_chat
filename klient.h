@@ -504,15 +504,16 @@ void odstranPriatela(char *menoOdstranovaneho) {
 }
 
 void vypisZoznamPriatelov() {
-    printf("\n\033[35;1mKLIENT: Pocet priatelov: %d \033[0m\n", pocetPriatelov);
-    printf("\033[35;1mKLIENT: Zoznam priatelov: \033[0m\n");
+    printf("\n\033[33;1mKLIENT: Pocet priatelov:\033[0m %d\n", pocetPriatelov);
+    printf("\033[33;1mKLIENT: Zoznam priatelov: \033[0m\n");
     int pocitadlo = 0;
     for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
         if (priatelia[i]) {
             pocitadlo++;
-            printf("\t\t%d. %s\n", pocitadlo, priatelia[i]->name);
+            printf("\t\t\033[34;1m%d.\033[0m %s\n", pocitadlo, priatelia[i]->name);
         }
     }
+    printf("\n");
 }
 
 void vypisUvodneMenu() {
@@ -525,7 +526,8 @@ void vypisUvodneMenu() {
 }
 
 void vypisHlavneMenu() {
-    puts("\n[1] Posli spravu");
+    puts("\n\033[36;1m|--- CHAT APP ---|\033[0m");
+    puts("[1] Posli spravu");
     puts("[2] Ziskaj spravu");
     puts("[3] Odhlasenie");
     puts("[4] Online uzivatelia");
@@ -541,40 +543,42 @@ void vypisanieNovejSpravy() {
     char *sprava;
     odosielatel = strtok(NULL, " ");
     sprava = strtok(NULL, "\0");
-    puts("Nova sprava od ineho klienta");
-    printf("Nova sprava od %s: %s\n", odosielatel, sprava);
+    printf("\n\033[34;1mNOVA SPRAVA od \033[0m%s\033[34;1m:\033[0m %s\n", odosielatel, sprava);
     fflush(stdout);
 }
 
 void vypisOnlineUzivatelov() {
     int pocetOnline = atoi(strtok(NULL, " "));
     if (pocetOnline <= 1) {
-        printf("Okrem vas nie je online ziadny iny pouzivatel\n");
+        printf("\n\033[33;1mOkrem vas nie je online ziadny iny pouzivatel.\033[0m\n");
     } else {
-        printf("Nasledujuci pouzivatelia su online: \n");
+        printf("\n\033[33;1mNasledujuci pouzivatelia su online: \033[0m\n");
     }
+    int pocitadlo = 0;
     for (int i = 0; i < pocetOnline; ++i) {
         char *meno = strtok(NULL, " ");
         if (strcmp(meno, name) == 0) {
-            printf("Vy: %s\n", meno);
+            printf("\t\t\033[36;1mVy:\033[0m %s\n", meno);
         } else {
-            printf("%s \n", meno);
+            pocitadlo++;
+            printf("\t\t\033[34;1m%d.\033[0m %s \n", pocitadlo, meno);
         }
     }
+    printf("\n");
 }
 
 void vypisPridaniePriatelaServer() {
     char *ziadostOd;
     ziadostOd = strtok(NULL, "\0");
     pridajPriatela(ziadostOd);
-    printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas pridal do priatelov!\033[0m\n", ziadostOd);
+    printf("\n\033[34;1mKLIENT: Pouzivatel\033[0m %s \033[34;1msi Vas pridal do priatelov!\033[0m\n", ziadostOd);
 }
 
 void vypisOdstraneniePriatelaServer() {
     char *ziadostOd;
     ziadostOd = strtok(NULL, "\0");
     odstranPriatela(ziadostOd);
-    printf("\n\033[35;1mKLIENT: Pouzivatel %s si Vas odstranil z priatelov!\033[0m\n", ziadostOd);
+    printf("\n\033[34;1mKLIENT: Pouzivatel\033[0m %s \033[34;1msi Vas odstranil z priatelov!\033[0m\n", ziadostOd);
 }
 
 void pridaniePriatelaKlient(int sockfd) {
@@ -587,7 +591,7 @@ void pridaniePriatelaKlient(int sockfd) {
         pridajPriatela(menoPridavaneho);
         posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
     } else {
-        printf("\n\033[35;1mKLIENT: Nemozete byt priatel sam so sebou.\033[0m\n");
+        printf("\n\033[31;1mKLIENT: Nemozete byt priatel sam so sebou.\033[0m\n");
     }
 }
 
@@ -618,27 +622,27 @@ void spracujPrikazZoServera(char *prikaz) {
 
 
     if (strcmp(prikaz, NEUSPESNA_REGISTRACIA) == 0) {
-        puts("\n\033[35;1mKLIENT: Registracia bola neuspesna!\033[0m\n");
+        puts("\n\033[31;1mKLIENT: Registracia bola neuspesna!\033[0m\n");
 
     } else if (strcmp(prikaz, USPESNA_REGISTRACIA) == 0) {
         jePrihlaseny = 1;
-        puts("\n\033[35;1mKLIENT: Registracia prebehla uspesne!\033[0m\n");
+        puts("\n\033[32;1mKLIENT: Registracia prebehla uspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, NEUSPESNE_PRIHLASENIE) == 0) {
-        puts("\n\033[35;1mKLIENT: Prihlasenie bolo neuspesne!\033[0m\n");
+        puts("\n\033[31;1mKLIENT: Prihlasenie bolo neuspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, USPESNE_PRIHLASENIE) == 0) {
         jePrihlaseny = 1;
-        puts("\n\033[35;1mKLIENT: Prihlasenie prebehlo uspesne!\033[0m\n");
+        puts("\n\033[32;1mKLIENT: Prihlasenie prebehlo uspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, NEUSPESNE_ZRUSENIE) == 0) {
-        puts("\n\033[35;1mKLIENT: Zrusenie uctu bolo neuspesne!\033[0m\n");
+        puts("\n\033[31;1mKLIENT: Zrusenie uctu bolo neuspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, USPESNE_ZRUSENIE) == 0) {
-        puts("\n\033[35;1mKLIENT: Zrusenie uctu prebehlo uspesne!\033[0m\n");
+        puts("\n\033[32;1mKLIENT: Zrusenie uctu prebehlo uspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, SPRAVA_ODOSIELATELOVI) == 0) {
-        puts("\n\033[35;1mKLIENT: Sprava bola prijata serverom na spracovanie!\033[0m\n");
+        puts("\n\033[32;1mKLIENT: Sprava bola prijata serverom na spracovanie!\033[0m\n");
 
     } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
         vypisanieNovejSpravy();
@@ -656,15 +660,15 @@ void spracujPrikazZoServera(char *prikaz) {
         char *meno = strtok(NULL, "\0");
         printf("MENO: %s\n", meno);
         odstranPriatela(meno);
-        puts("\n\033[35;1mKLIENT: Pridanie priatela bolo neuspesne!\033[0m\n");
+        puts("\n\033[31;1mKLIENT: Pridanie priatela bolo neuspesne!\033[0m\n");
 
     } else if (strcmp(prikaz, NEZRUSENIE_PRIATELSTVA) == 0) {
         char *meno = strtok(NULL, "\0");
         printf("MENO: %s\n", meno);
         pridajPriatela(meno);
-        puts("\n\033[35;1mKLIENT: Zrusenie priatelstva bolo neuspesne!\033[0m\n");
+        puts("\n\033[31;1mKLIENT: Zrusenie priatelstva bolo neuspesne!\033[0m\n");
     } else {
-        printf("Spadlo to do else s takymto prikazom %s\n", prikaz);
+        printf("\n\033[31;1mSpadlo to do else s takymto prikazom:\033[0m %s\n", prikaz);
     }
 }
 
@@ -683,7 +687,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
         } else if (akcia == 3) {
             zrusenieUctu(sockfd);
         } else {
-            printf("Nespravne cislo akcie!\n");
+            printf("\n\033[31;1mNespravne cislo akcie!\033[0m\n\n");
             return BREAK;
         }
 
@@ -700,7 +704,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                     zacalChat = 1;
                     prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
                 } else {
-                    printf("\n\033[35;1mKLIENT: Zadany pouzivatel nie je vo Vasom zozname priatelov.\033[0m\n");
+                    printf("\n\033[31;1mKLIENT: Zadany pouzivatel nie je vo Vasom zozname priatelov.\033[0m\n");
                     return BREAK;
                 }
 
@@ -732,7 +736,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
             vypisZoznamPriatelov();
             return BREAK;
         } else {
-            printf("Nespravne cislo akcie!\n");
+            printf("\n\033[31;1mNespravne cislo akcie!\033[0m\n\n");
             return BREAK;
         }
     }

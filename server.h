@@ -52,7 +52,7 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
                 fprintf(subor, pomPassword);
                 fprintf(subor, "\n");
                 fclose(subor);
-                printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela %s.\033[0m\n", login);
+                printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela:\033[0m %s\n", login);
                 free(pomPassword);
                 return 1;
             } else {
@@ -71,7 +71,7 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
     } else {
         // Zadany login sa v databaze pouzivatelov uz nachadza
         fclose(subor);
-        printf("\n\033[32;1mSERVER: Login %s uz existuje.\033[0m\n", suborLogin);
+        printf("\n\033[32;1mSERVER: Login\033[0m %s \033[32;1muz existuje.\033[0m\n", suborLogin);
         return 0;
     }
 }
@@ -98,10 +98,10 @@ int prihlasenie(char *login, char *heslo) {
 
     fclose(subor);
     if (foundLogin == 1) {
-        printf("\n\033[32;1mSERVER: Pouzivatel %s sa prihlasil\033[0m\n", loginFile);
+        printf("\n\033[32;1mSERVER: Pouzivatel\033[0m %s \033[32;1msa prihlasil.\033[0m\n", loginFile);
         return 1;
     } else {
-        printf("\n\033[32;1mSERVER: Nespravne meno alebo heslo\033[0m\n");
+        printf("\n\033[32;1mSERVER: Nespravne meno alebo heslo.\033[0m\n");
         return 0;
     }
 
@@ -132,7 +132,7 @@ int zrusenieUctu(char *login, char *heslo) {
     if (foundLogin == 1) {
         subor = fopen(MENO_SUBORU, "a+");
         novySubor = fopen("novy_subor.txt", "a+");
-        printf("\n\033[32;1mSERVER: Pouzivatel %s si zrusil ucet\033[0m\n", loginFile);
+        printf("\n\033[32;1mSERVER: Pouzivatel\033[0m %s \033[32;1msi zrusil ucet\033[0m\n", loginFile);
         char log[LOGIN_MAX_DLZKA];
         char pass[HESLO_MAX_DLZKA];
         while (fscanf(subor, " %s %s", log, pass) == 2) {

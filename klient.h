@@ -631,6 +631,17 @@ void spracujPrikazZoServera(char *prikaz) {
     } else if (strcmp(prikaz, ODSTRANENIE_PRIATELA) == 0) {
 
         vypisOdstraneniePriatelaServer();
+    } else if (strcmp(prikaz, NEMOZNO_SPRIATELIT) == 0) {
+        char *meno = strtok(NULL, "\0");
+        printf("MENO: %s\n", meno);
+        odstranPriatela(meno);
+        puts("\n\033[35;1mKLIENT: Pridanie priatela bolo neuspesne!\033[0m\n");
+
+    } else if (strcmp(prikaz, NEZRUSENIE_PRIATELSTVA) == 0) {
+        char *meno = strtok(NULL, "\0");
+        printf("MENO: %s\n", meno);
+        pridajPriatela(meno);
+        puts("\n\033[35;1mKLIENT: Zrusenie priatelstva bolo neuspesne!\033[0m\n");
     } else {
         printf("Spadlo to do else s takymto prikazom %s\n", prikaz);
     }

@@ -200,7 +200,7 @@ int prihlasenie2(char buffer[], int sockfd) {
     bzero(buffer, BUFFER_SIZE);
 }
 
-int chatovanie(int sockfd) {
+int chatovanie(char *meno, int sockfd) {
     char sprava[SPRAVA_MAX_DLZKA], buffer[BUFFER_SIZE];
 
     printf("\n\033[35;1mKLIENT: Prosim, zadajte spravu: \033[0m");

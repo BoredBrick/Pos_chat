@@ -81,8 +81,6 @@ void klientovCyklus2(int sockfd) {
 void klientovCyklus(int sockfd) {
     fd_set klientFD;
 
-    int prebiehaChat = 0;
-
     char msgBuffer[BUFFER_SIZE];
 
     while (1) {
@@ -129,7 +127,7 @@ void klientovCyklus(int sockfd) {
                     bzero(msgBuffer, BUFFER_SIZE);
                 } else if (fd == 0) { // citanie z klavesnice a posielanie na server
                     // spravy serveru
-                    char *res = spracujUzivatelovuAkciu(akcia, sockfd);
+                    const char *res = spracujUzivatelovuAkciu(akcia, sockfd);
                     if (strcmp(res, BREAK) == 0) {
                         break;
                     } else if (strcmp(res, CONTINUE) == 0) {

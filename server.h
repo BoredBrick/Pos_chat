@@ -17,44 +17,61 @@ int registracia(char *login, char *heslo, char *potvrdHeslo) {
 
     FILE *subor;
     subor = fopen(MENO_SUBORU, "a+");
-    char pomocna[BUFFER_SIZE];
-    bzero(pomocna, BUFFER_SIZE);
     char suborLogin[BUFFER_SIZE];
     bzero(suborLogin, BUFFER_SIZE);
+    char suborHeslo[BUFFER_SIZE];
+    bzero(suborHeslo, BUFFER_SIZE);
+
     int jeUzZaregistrovany = 0;
 
-    while (fscanf(subor, "%s %s", suborLogin, pomocna) == 2) {
-        if (strcmp(pomocna, login) == 0) {
+    while (fscanf(subor, "%s %s", suborLogin, suborHeslo) == 2) {
+        if (strcmp(suborLogin, login) == 0) {
             jeUzZaregistrovany = 1;
             break;
         }
-        bzero(pomocna, BUFFER_SIZE);
         bzero(suborLogin, BUFFER_SIZE);
+        bzero(suborHeslo, BUFFER_SIZE);
 
     }
 
     if (jeUzZaregistrovany == 0) {
-        if (strcmp(heslo, potvrdHeslo) == 0) {
-            char *pomPassword = malloc(sizeof(char) * strlen(heslo));
-            sifrujRetazec(pomPassword, heslo);
-            fprintf(subor, login);
-            fprintf(subor, " ");
-            fprintf(subor, pomPassword);
-            fprintf(subor, "\n");
-            fclose(subor);
-            printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela %s.\033[0m\n", login);
-            free(pomPassword);
-            return 1;
+        int pocetZnakovLogin = 0;
+        int pocetZnakovHeslo = 0;
+        for (int i = 0; i < strlen(login); ++i) {
+            pocetZnakovLogin++;
+        }
+        for (int i = 0; i < strlen(heslo); ++i) {
+            pocetZnakovHeslo++;
+        }
+        if (pocetZnakovLogin >= 4 && pocetZnakovHeslo >= 4) {
+            if (strcmp(heslo, potvrdHeslo) == 0) {
+                char *pomPassword = malloc(sizeof(char) * strlen(heslo));
+                sifrujRetazec(pomPassword, heslo);
+                fprintf(subor, login);
+                fprintf(subor, " ");
+                fprintf(subor, pomPassword);
+                fprintf(subor, "\n");
+                fclose(subor);
+                printf("\n\033[32;1mSERVER: Vykonala sa registracia noveho pouzivatela %s.\033[0m\n", login);
+                free(pomPassword);
+                return 1;
+            } else {
+                // Zadane heslo a potvrdene heslo sa nezhoduju
+                fclose(subor);
+                printf("\n\033[32;1mSERVER: Hesla sa nezhoduju.\033[0m\n");
+                return 2;
+            }
         } else {
-            // Zadane heslo a potvrdene heslo sa nezhoduju
+            // Zadany login alebo heslo nesplnuju poziadavky
             fclose(subor);
-            printf("\n\033[32;1mSERVER: Hesla sa nezhoduju.\033[0m\n");
+            printf("\n\033[32;1mSERVER: Login alebo heslo su prilis kratke.\033[0m\n");
             return 2;
         }
+
     } else {
         // Zadany login sa v databaze pouzivatelov uz nachadza
         fclose(subor);
-        printf("\n\033[32;1mSERVER: Login %s uz existuje.\033[0m\n", pomocna);
+        printf("\n\033[32;1mSERVER: Login %s uz existuje.\033[0m\n", suborLogin);
         return 0;
     }
 }
@@ -138,6 +155,12 @@ int zrusenieUctu(char *login, char *heslo) {
         char nazovSuboru[BUFFER_SIZE];
         strcat(nazovSuboru, login);
         strcat(nazovSuboru, ".txt");
+
+        // vymazanie obsahu suboru
+        FILE *priatelia;
+        priatelia = fopen(nazovSuboru, "w");
+        fclose(priatelia);
+
         if (remove(nazovSuboru) != 0) {
             printf("Nepodarilo sa odstranit subor\n");
         }

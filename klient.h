@@ -17,6 +17,7 @@
 char name[LOGIN_MAX_DLZKA];
 int jePrihlaseny = 0;
 int pocetPriatelov = 0;
+int prebiehaChat = 0;
 
 typedef struct {
     char name[LOGIN_MAX_DLZKA];
@@ -626,7 +627,6 @@ void spracujPrikazZoServera(char *prikaz) {
 
 const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
-    int prebiehaChat;
     if (!jePrihlaseny) {
 
         if (akcia == 1) {

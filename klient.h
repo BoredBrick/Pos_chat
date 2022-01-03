@@ -622,6 +622,8 @@ void spracujPrikazZoServera(char *prikaz) {
     } else if (strcmp(prikaz, ODSTRANENIE_PRIATELA) == 0) {
 
         vypisOdstraneniePriatelaServer();
+    } else {
+        printf("Spadlo to do else s takymto prikazom %s\n", prikaz);
     }
 }
 
@@ -639,6 +641,9 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
         } else if (akcia == 3) {
             zrusenieUctu(sockfd);
+        }else {
+            printf("Nespravne cislo akcie!\n");
+            return BREAK;
         }
 
     } else {
@@ -669,6 +674,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
             return BREAK;
         } else {
             printf("Nespravne cislo akcie!\n");
+            return BREAK;
         }
     }
     return "ok";

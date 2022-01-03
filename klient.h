@@ -675,11 +675,18 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
             if (zacalChat == 0) {
                 bzero(menoPrijemcuSpravy, LOGIN_MAX_DLZKA);
-                printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, s ktorym chcete zacat konverzaciu: \033[0m\n");
+                printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, s ktorym chcete zacat konverzaciu: \033[0m");
                 scanf("%s", &menoPrijemcuSpravy);
                 getchar();
-                zacalChat = 1;
-                prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
+
+                if (jePriatel(menoPrijemcuSpravy) == 1) {
+                    zacalChat = 1;
+                    prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
+                } else {
+                    printf("\n\033[35;1mKLIENT: Zadany pouzivatel nie je vo Vasom zozname priatelov.\033[0m\n");
+                    return BREAK;
+                }
+
             } else {
                 prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
             }

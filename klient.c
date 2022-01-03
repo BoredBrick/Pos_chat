@@ -184,6 +184,11 @@ int main(int argc, char *argv[]) {
 
     //klientovCyklus2(sockfd);
 
+    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
+        if (priatelia[i]) {
+           free(priatelia[i]);
+        }
+    }
     close(sockfd);
 
     return 0;

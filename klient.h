@@ -377,8 +377,8 @@ void odstranZPolaPriatelov(char *meno) {
     for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
         if (priatelia[i]) {
             if (strcmp(priatelia[i]->name, meno) == 0) {
-                priatelia[i] = NULL;
                 free(priatelia[i]);
+                priatelia[i]=NULL;
                 pocetPriatelov--;
                 break;
             }

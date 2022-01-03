@@ -114,7 +114,6 @@ void *obsluhaKlienta(void *arg) {
 
         } else if (strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
-            printf("SOM TU\n");
         } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0) {
             oznamenieOPriatelstve();
 

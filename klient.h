@@ -399,6 +399,9 @@ void nacitajZoznamPriatelov() {
 
     char loginPriatelia[LOGIN_MAX_DLZKA];
     char loginRegistrovani[LOGIN_MAX_DLZKA];
+    bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
+    bzero(loginPriatelia,LOGIN_MAX_DLZKA);
+
 
     while (fscanf(suborPriatelia, " %s", loginPriatelia) == 1) {
         while (fscanf(suborZaregistrovani, " %s", loginRegistrovani) == 1) {
@@ -406,8 +409,14 @@ void nacitajZoznamPriatelov() {
                 priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
                 strcpy(novyPriatel->name, loginPriatelia);
                 pridajDoPolaPriatelov(novyPriatel);
+                bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
+                break;
+
             }
+            bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
         }
+        bzero(loginPriatelia,LOGIN_MAX_DLZKA);
+        rewind(suborZaregistrovani);
     }
 
     fclose(suborPriatelia);

@@ -15,9 +15,11 @@
 #endif //POS_ZAPOCET_2_KLIENT_H
 
 char name[LOGIN_MAX_DLZKA];
+char menoPrijemcuSpravy[LOGIN_MAX_DLZKA];
 int jePrihlaseny = 0;
 int pocetPriatelov = 0;
 int prebiehaChat = 0;
+int zacalChat = 0;
 
 typedef struct {
     char name[LOGIN_MAX_DLZKA];
@@ -214,6 +216,8 @@ int chatovanie(int sockfd) {
 
     strcat(buffer, " ");
     strcat(buffer, name);
+    strcat(buffer, " ");
+    strcat(buffer, meno);
     strcat(buffer, " ");
     strcat(buffer, sprava); // sprava obsahuje meno komu je urcena - admin toto je text spravy
     buffer[strcspn(buffer, "\n")] = 0;
@@ -668,8 +672,19 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
     } else {
         if (akcia == 1) {
-            prebiehaChat = chatovanie(sockfd);
+
+            if (zacalChat == 0) {
+                bzero(menoPrijemcuSpravy, LOGIN_MAX_DLZKA);
+                printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, s ktorym chcete zacat konverzaciu: \033[0m\n");
+                scanf("%s", &menoPrijemcuSpravy);
+                getchar();
+                zacalChat = 1;
+                prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
+            } else {
+                prebiehaChat = chatovanie(menoPrijemcuSpravy, sockfd);
+            }
             if (prebiehaChat == 0) {
+                zacalChat = 0;
                 return BREAK;
             }
         } else if (akcia == 2) {

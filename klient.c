@@ -11,6 +11,13 @@
 #include <unistd.h>
 #include <pthread.h>
 
+typedef struct data {
+    int datasockfd;
+    int *bolExit;
+} D;
+
+pthread_mutex_t mutexKlient = PTHREAD_MUTEX_INITIALIZER;
+
 void *serverPocuva(void *data) {
     D *d = data;
 
@@ -148,6 +155,7 @@ void klientovCyklus(int sockfd) {
     fd_set klientFD;
 
     char msgBuffer[BUFFER_SIZE];
+    bzero(msgBuffer, BUFFER_SIZE);
 
     while (1) {
         int akcia = -1;
@@ -264,7 +272,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
         if (priatelia[i]) {
-           free(priatelia[i]);
+            free(priatelia[i]);
         }
     }
     close(sockfd);

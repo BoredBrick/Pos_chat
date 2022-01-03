@@ -11,6 +11,72 @@
 #include <unistd.h>
 #include <pthread.h>
 
+void *serverPocuva(void *data) {
+    D *d = data;
+
+    char msgBuffer[BUFFER_SIZE];
+    bzero(msgBuffer, BUFFER_SIZE);
+
+    pthread_mutex_lock(&mutexKlient);
+    while ((*d->bolExit) == 0) {
+        pthread_mutex_unlock(&mutexKlient);
+
+        if (recv(d->datasockfd, msgBuffer, BUFFER_SIZE, MSG_PEEK) > 0) {
+            listenToServer(msgBuffer, d->datasockfd);
+
+            odsifrujRetazec(msgBuffer, msgBuffer);
+
+            char *prikaz;
+            prikaz = strtok(msgBuffer, " "); // vyseknutie prikazu zo serveru
+            spracujPrikazZoServera(prikaz);
+
+            bzero(msgBuffer, BUFFER_SIZE);
+        }
+
+    }
+
+    return NULL;
+}
+
+void *klientZapisuje(void *data) {
+    D *d = data;
+
+    pthread_mutex_lock(&mutexKlient);
+    while ((*d->bolExit) == 0) {
+        pthread_mutex_unlock(&mutexKlient);
+
+        int akcia = -1;
+        if (!jePrihlaseny) {
+            vypisUvodneMenu();
+            scanf("%d", &akcia);
+            getchar();
+        } else {
+            if (prebiehaChat == 0) {
+                vypisHlavneMenu();
+                scanf("%d", &akcia);
+                getchar();
+            } else {
+                akcia = 1;
+            }
+        }
+
+        if (akcia == 0) {
+            (*d->bolExit) = 1;
+            ukoncenieAplikacie(d->datasockfd);
+            break;
+        }
+        spracujUzivatelovuAkciu(akcia, d->datasockfd);
+//        const char *res = spracujUzivatelovuAkciu(akcia, d->datasockfd);
+//        if (strcmp(res, BREAK) == 0) {
+//            break;
+//        } else if (strcmp(res, CONTINUE) == 0) {
+//            continue;
+//        }
+        sleep(1);
+    }
+
+    return NULL;
+}
 
 void klientovCyklus2(int sockfd) {
 
@@ -147,6 +213,8 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
+    pthread_t vlaknoKlienta, vlaknoServera;
+
     if (argc < 3) {
         fprintf(stderr, "usage %s hostname port\n", argv[0]);
         return 1;
@@ -180,7 +248,17 @@ int main(int argc, char *argv[]) {
         return 4;
     }
 
-    klientovCyklus(sockfd);
+    int datasockfd = sockfd;
+    int bolExit = 0;
+    D d = {datasockfd, &bolExit};
+
+    pthread_create(&vlaknoKlienta, NULL, &klientZapisuje, &d);
+    pthread_create(&vlaknoServera, NULL, &serverPocuva, &d);
+
+    pthread_join(vlaknoKlienta, NULL);
+    pthread_join(vlaknoServera, NULL);
+
+    //klientovCyklus(sockfd);
 
     //klientovCyklus2(sockfd);
 

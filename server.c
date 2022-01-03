@@ -77,7 +77,7 @@ void send_message(char *s, char *komu) {
 void *obsluhaKlienta(void *arg) {
     printf("\033[32;1mSERVER: Bolo vytvorene vlakno pre klienta!\033[0m\n");
     char buffer[BUFFER_SIZE];
-    bzero(buffer,BUFFER_SIZE);
+    bzero(buffer, BUFFER_SIZE);
     cli_count++;
 
     client *cli = (client *) arg;
@@ -115,10 +115,10 @@ void *obsluhaKlienta(void *arg) {
         } else if (strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
         } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0) {
-            oznamenieOPriatelstve();
+            oznamenieOPriatelstve(clientSockFD);
 
         } else if (strcmp(typSpravy, ZRUS_PRIATELA) == 0) {
-            oznamenieOOdstraneniZPriatelov();
+            oznamenieOOdstraneniZPriatelov(clientSockFD);
 
         }
     }
@@ -354,7 +354,7 @@ void zoznamOnlinePouzivatelov(int clientSockFD) {
     writeToClient(buffer, clientSockFD);
 }
 
-void oznamenieOPriatelstve() {
+void oznamenieOPriatelstve(int clientSockFD) {
     char *komu;
     char *odKoho;
     komu = strtok(NULL, " ");
@@ -366,13 +366,23 @@ void oznamenieOPriatelstve() {
     strcat(msg, " ");
     strcat(msg, odKoho);
 
-    sifrujRetazec(msg, msg);
 
     int socket = najdiSocketPodlaMena(komu);
-    writeToClient(msg, socket);
+    if (!socket) {
+        char newMsg[BUFFER_SIZE];
+        bzero(newMsg, BUFFER_SIZE);
+        strcat(newMsg, NEMOZNO_SPRIATELIT);
+        strcat(newMsg, " ");
+        strcat(newMsg, komu);
+        sifrujRetazec(newMsg, newMsg);
+        writeToClient(newMsg, clientSockFD);
+    } else {
+        sifrujRetazec(msg, msg);
+        writeToClient(msg, socket);
+    }
 }
 
-void oznamenieOOdstraneniZPriatelov() {
+void oznamenieOOdstraneniZPriatelov(int clientSockFD) {
     char *komu;
     char *odKoho;
     komu = strtok(NULL, " ");
@@ -384,10 +394,20 @@ void oznamenieOOdstraneniZPriatelov() {
     strcat(msg, " ");
     strcat(msg, odKoho);
 
-    sifrujRetazec(msg, msg);
 
     int socket = najdiSocketPodlaMena(komu);
-    writeToClient(msg, socket);
+    if (!socket) {
+        char newMsg[BUFFER_SIZE];
+        bzero(newMsg, BUFFER_SIZE);
+        strcat(newMsg, NEZRUSENIE_PRIATELSTVA);
+        strcat(newMsg, " ");
+        strcat(newMsg, komu);
+        sifrujRetazec(newMsg, newMsg);
+        writeToClient(newMsg, clientSockFD);
+    } else {
+        sifrujRetazec(msg, msg);
+        writeToClient(msg, socket);
+    }
 }
 
 int najdiSocketPodlaMena(char *meno) {

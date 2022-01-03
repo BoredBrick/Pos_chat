@@ -20,6 +20,7 @@ const char *ZRUS_PRIATELA = "zrus_priatela";
 const char *BREAK = "break";
 const char *CONTINUE = "continue";
 
+
 // SPRAVY OD SERVERA
 const char *USPESNA_REGISTRACIA = "uspesna_registracia";
 const char *NEUSPESNA_REGISTRACIA = "neuspesna_registracia";
@@ -32,6 +33,8 @@ const char *SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
 const char *ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
 const char *PRIDANIE_PRIATELA = "pridanie_priatela";
 const char *ODSTRANENIE_PRIATELA = "odstranenie_priatela";
+const char *NEMOZNO_SPRIATELIT = "nemozno_spriatelit";
+const char *NEZRUSENIE_PRIATELSTVA = "nezrusenie_priatelstva";
 
 // INE
 #define KLUC 5

@@ -1,5 +1,5 @@
 //
-// Created by Matúš Baláži on 28. 12. 2021.
+// Created by Ma1túš Baláži on 28. 12. 2021.
 //
 
 #include "klient.h"

@@ -173,9 +173,9 @@ int zrusenieUctu(char *login, char *heslo) {
 
 int najdiSocketPodlaMena(char *meno);
 
-void oznamenieOPriatelstve();
+void oznamenieOPriatelstve(int clientSockFD);
 
-void oznamenieOOdstraneniZPriatelov();
+void oznamenieOOdstraneniZPriatelov(int clientSockFD);
 
 void zoznamOnlinePouzivatelov(int newsockfd);
 

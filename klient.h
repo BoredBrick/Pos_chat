@@ -378,7 +378,7 @@ void odstranZPolaPriatelov(char *meno) {
         if (priatelia[i]) {
             if (strcmp(priatelia[i]->name, meno) == 0) {
                 free(priatelia[i]);
-                priatelia[i]=NULL;
+                priatelia[i] = NULL;
                 pocetPriatelov--;
                 break;
             }
@@ -399,8 +399,8 @@ void nacitajZoznamPriatelov() {
 
     char loginPriatelia[LOGIN_MAX_DLZKA];
     char loginRegistrovani[LOGIN_MAX_DLZKA];
-    bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
-    bzero(loginPriatelia,LOGIN_MAX_DLZKA);
+    bzero(loginRegistrovani, LOGIN_MAX_DLZKA);
+    bzero(loginPriatelia, LOGIN_MAX_DLZKA);
 
 
     while (fscanf(suborPriatelia, " %s", loginPriatelia) == 1) {
@@ -409,13 +409,13 @@ void nacitajZoznamPriatelov() {
                 priatel *novyPriatel = (priatel *) malloc(sizeof(priatel));
                 strcpy(novyPriatel->name, loginPriatelia);
                 pridajDoPolaPriatelov(novyPriatel);
-                bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
+                bzero(loginRegistrovani, LOGIN_MAX_DLZKA);
                 break;
 
             }
-            bzero(loginRegistrovani,LOGIN_MAX_DLZKA);
+            bzero(loginRegistrovani, LOGIN_MAX_DLZKA);
         }
-        bzero(loginPriatelia,LOGIN_MAX_DLZKA);
+        bzero(loginPriatelia, LOGIN_MAX_DLZKA);
         rewind(suborZaregistrovani);
     }
 
@@ -650,7 +650,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
         } else if (akcia == 3) {
             zrusenieUctu(sockfd);
-        }else {
+        } else {
             printf("Nespravne cislo akcie!\n");
             return BREAK;
         }

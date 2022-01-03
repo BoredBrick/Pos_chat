@@ -79,7 +79,7 @@ void *klientZapisuje(void *data) {
 //        } else if (strcmp(res, CONTINUE) == 0) {
 //            continue;
 //        }
-        sleep(1);
+        usleep(500000);
     }
 
     return NULL;

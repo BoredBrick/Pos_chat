@@ -31,6 +31,10 @@ void vypisHlavneMenu() {
     printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
 }
 
+void vypisanieSpravyZHistorie(char *odosielatel, char *prijimatel, char *sprava) {
+    printf("\n\033[90;1m%s>%s: %s\033[0m", odosielatel, prijimatel, sprava);
+}
+
 void vypisanieNovejSpravy(char* typSpravy) {
     char *odosielatel;
     char *sprava;

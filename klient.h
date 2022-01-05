@@ -141,7 +141,6 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
     bzero(sprava, SPRAVA_MAX_DLZKA);
     scanf("%[^\n]s", &sprava);
     getchar();
-    // TYP_SPRAVY | ODOSIELATEL | POCET | PRIJEMCOVIA | SPRAVA
 
 
     //strcat(buffer, " ");
@@ -149,10 +148,10 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
     char kopiaPrijemcov[BUFFER_SIZE];
     bzero(kopiaPrijemcov, BUFFER_SIZE);
     strcpy(kopiaPrijemcov, prijemcovia);
-    char* ptr;
+    char *ptr;
 
     for (int i = 0; i < pocet; ++i) {
-        bzero(buffer,BUFFER_SIZE);
+        bzero(buffer, BUFFER_SIZE);
 
         if (strcmp(sprava, "exit") == 0) {
             strcat(buffer, UKONCENIE_CHATOVANIA);
@@ -163,7 +162,7 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
         strcat(buffer, " ");
         strcat(buffer, name); //moje meno
         strcat(buffer, " ");
-        if(i == 0) {
+        if (i == 0) {
             strcat(buffer, strtok_r(kopiaPrijemcov, " ", &ptr));
         } else {
             strcat(buffer, strtok_r(NULL, " ", &ptr));
@@ -234,6 +233,30 @@ void onlineUzivatelia(int sockfd) {
     writeToSocket(buffer, sockfd);
 }
 
+void vypisHistoriu(char *sKym) {
+    char kopiaHistorieSprav[BUFFER_HISTORIA_SPRAV_SIZE];
+    bzero(kopiaHistorieSprav, BUFFER_HISTORIA_SPRAV_SIZE);
+    strcpy(kopiaHistorieSprav, historiaSprav);
+
+    for (int i = 0; i < pocetSpravVBuffri; ++i) {
+        char *odosielatel;
+        char *prijimatel;
+        char *sprava;
+        char *ptr;
+
+        if(i == 0) {
+            odosielatel = strtok_r(kopiaHistorieSprav, ">", &ptr);
+        } else {
+            odosielatel = strtok_r(NULL, ">", &ptr);
+        }
+        prijimatel = strtok_r(NULL, ":", &ptr);
+        sprava = strtok_r(NULL, "\n", &ptr);
+
+        if ( (strcmp(odosielatel, sKym) == 0) || (strcmp(prijimatel, sKym) == 0) ) {
+            vypisanieSpravyZHistorie(odosielatel, prijimatel, sprava);
+        }
+    }
+}
 
 void spracujPrikazZoServera(char *prikaz, char *kopiaSpravy) {
 
@@ -263,6 +286,23 @@ void spracujPrikazZoServera(char *prikaz, char *kopiaSpravy) {
 
     } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
         vypisanieNovejSpravy(prikaz);
+
+        strtok(kopiaSpravy, " ");
+
+        char *odosielatel;
+        odosielatel = strtok(NULL, " ");
+        char *sprava;
+        sprava = strtok(NULL, "\0");
+
+        pocetSpravVBuffri++;
+
+        // odosielatel>prijimatel: obsah spravy\n
+        strcat(historiaSprav, odosielatel);
+        strcat(historiaSprav, ">");
+        strcat(historiaSprav, name);
+        strcat(historiaSprav, ": ");
+        strcat(historiaSprav, sprava);
+
     } else if ((strcmp(prikaz, SPRAVA_PRIJIMATELOVI_SKUPINA) == 0)) {
         vypisanieNovejSpravy(prikaz);
     } else if (strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {

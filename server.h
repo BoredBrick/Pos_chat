@@ -158,9 +158,9 @@ int zrusenieUctu(char *login, char *heslo) {
         strcat(nazovSuboru, ".txt");
 
         // vymazanie obsahu suboru
-        FILE *priatelia;
-        priatelia = fopen(nazovSuboru, "w");
-        fclose(priatelia);
+        //FILE *priatelia;
+        //priatelia = fopen(nazovSuboru, "w");
+        //fclose(priatelia);
 
         if (remove(nazovSuboru) != 0) {
             printf("Nepodarilo sa odstranit subor\n");

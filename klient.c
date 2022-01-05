@@ -52,12 +52,14 @@ void *klientZapisuje(void *data) {
             scanf("%d", &akcia);
             getchar();
         } else {
-            if (prebiehaChat == 0) {
+            if (prebiehaSukromnyChat == 1) {
+                akcia = 1;
+            } else if (prebiehaSkupinovyChat == 1) {
+                akcia = 2;
+            } else {
                 vypisHlavneMenu();
                 scanf("%d", &akcia);
                 getchar();
-            } else {
-                akcia = 1;
             }
         }
 

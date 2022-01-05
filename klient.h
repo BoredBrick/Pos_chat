@@ -133,6 +133,9 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
 
     //strcat(buffer, " ");
     //strcat(buffer, name);
+    char kopiaPrijemcov[BUFFER_SIZE];
+    bzero(kopiaPrijemcov, BUFFER_SIZE);
+    strcpy(kopiaPrijemcov, prijemcovia);
     char* ptr;
 
     for (int i = 0; i < pocet; ++i) {
@@ -148,7 +151,7 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
         strcat(buffer, name); //moje meno
         strcat(buffer, " ");
         if(i == 0) {
-            strcat(buffer, strtok_r(prijemcovia, " ", &ptr));
+            strcat(buffer, strtok_r(kopiaPrijemcov, " ", &ptr));
         } else {
             strcat(buffer, strtok_r(NULL, " ", &ptr));
         }
@@ -353,7 +356,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                     }
                     if (nieJePriatel == 0) {
                         zacalChat = 1;
-                        prebiehaChat = skupinovyChat(pocet, prijemcovia, sockfd);
+                        prebiehaSkupinovyChat = skupinovyChat(pocetPrijemcov, prijemcovia, sockfd);
                     } else {
                         zacalChat = 0;
                         return BREAK;
@@ -362,9 +365,9 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                     printf("\n\033[31;1mKLIENT: Na priamu komunikaciu s jednym priatelom pouzite sukromny chat.\033[0m\n");
                 }
             } else {
-                prebiehaChat = skupinovyChat(pocet, menoPrijemcuSpravy, sockfd);
+                prebiehaSkupinovyChat = skupinovyChat(pocetPrijemcov, prijemcovia, sockfd);
             }
-            if (prebiehaChat == 0) {
+            if (prebiehaSkupinovyChat == 0) {
                 zacalChat = 0;
                 return BREAK;
             }

@@ -3,11 +3,8 @@
 //
 
 #include "server.h"
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <pthread.h>
 
 static _Atomic unsigned int cli_count = 0;
@@ -23,6 +20,7 @@ typedef struct {
 client *klienti[KLIENTI_MAX_POCET];
 
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 void pridajKlienta(client *client) {
     pthread_mutex_lock(&clients_mutex);
@@ -88,7 +86,7 @@ void *obsluhaKlienta(void *arg) {
     int clientSockFD = cli->sockfd;
 
     while (bolExit == 0) {
-        listenToClient(buffer, clientSockFD);
+        listenToSocket(buffer, clientSockFD);
         odsifrujRetazec(buffer, buffer);
 
         char *typSpravy;
@@ -110,10 +108,11 @@ void *obsluhaKlienta(void *arg) {
             bolExit = 1;
 
         } else if (strcmp(typSpravy, UKONCENIE_CHATOVANIA) == 0) {
-            printf("\n\033[32;1mSERVER: Pouzivatel\033[0m %s \033[32;1mukoncil chat.\033[0m\n", cli->name);
+            vypisUkoncenieChatu(cli->name);
 
         } else if (strcmp(typSpravy, ONLINE_UZIVATELIA) == 0) {
             zoznamOnlinePouzivatelov(clientSockFD);
+
         } else if (strcmp(typSpravy, NOVY_PRIATEL) == 0) {
             oznamenieOPriatelstve(clientSockFD);
 
@@ -129,6 +128,8 @@ void *obsluhaKlienta(void *arg) {
     pthread_detach(pthread_self());
     return NULL;
 }
+
+
 
 int main(int argc, char *argv[]) {
     int sockfd, clientSockFD;
@@ -147,7 +148,6 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(atoi(argv[1]));
 
-
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Error creating socket");
@@ -160,48 +160,32 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
-
-    // Tento vypis dat skorej asi pod LISTENING
-    printf("\033[33;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
-
-    //LISTENING
     listen(sockfd, 5);
+    printf("\033[33;1mSERVER: Zapnutie prebehlo uspesne.\033[0m\n");
 
 
     while (1) {
         cli_len = sizeof(cli_addr);
-        // CONNECTION TO CLIENT
         clientSockFD = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_len);
         if (clientSockFD < 0) {
             perror("ERROR on accept");
             return 3;
         }
-        /*      // CHECK FOR MAX_CLIENTS
-         *      if ((cli_count + 1) == MAX_CLIENTS) {
-         *          printf("Maximum klienti connected. Connection rejected.\n");
-         *          print_ip_addr(cli_addr);
-         *          close(clientSockFD);
-         *          continue;
-         *      }
-         */
-        // CLIENT SETTINGS
+
         client *cli = (client *) malloc(sizeof(client));
         cli->address = cli_addr;
         cli->sockfd = clientSockFD;
         cli->clientID = clientIDstart++;
 
         pridajKlienta(cli);
-
         pthread_t vlakno;
         pthread_create(&vlakno, NULL, &obsluhaKlienta, (void *) cli);
 
-        // REDUCE CPU USAGE
         sleep(1);
 
     }
 
     close(sockfd);
-
     return 0;
 }
 
@@ -323,20 +307,6 @@ void spracovanieZruseniaUctu(int clientSockFD) {
     writeToSocket(msg, clientSockFD);
 }
 
-void writeToSocket(char *buffer, int sockfd) {
-    int n = write(sockfd, buffer, strlen(buffer) + 1);
-    if (n < 0) {
-        perror("Error writing to socket");
-    }
-}
-
-void listenToClient(char *buffer, int sockfd) {
-    bzero(buffer, 256);
-    int n = read(sockfd, buffer, 255);
-    if (n < 0) {
-        perror("Error reading from socket");
-    }
-}
 
 void zoznamOnlinePouzivatelov(int clientSockFD) {
     char buffer[BUFFER_SIZE];

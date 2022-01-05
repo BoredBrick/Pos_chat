@@ -54,7 +54,7 @@ int registracia(int sockfd) {
 
     buffer[strcspn(buffer, "\n")] = 0;
 
-    strcpy(name, login);
+    strcpy(clientName, login);
 
     sifrujRetazec(buffer, buffer);
 
@@ -82,8 +82,7 @@ int prihlasenie(int sockfd) {
 
     buffer[strcspn(buffer, "\n")] = 0;
 
-    strcpy(name, login);
-
+    strcpy(clientName, login);
     sifrujRetazec(buffer, buffer);
 
     // Poslanie udajov serveru
@@ -105,7 +104,7 @@ int sukromnyChat(char *meno, int sockfd) {
     }
 
     strcat(buffer, " ");
-    strcat(buffer, name);
+    strcat(buffer, clientName);
     strcat(buffer, " ");
     strcat(buffer, meno);
     strcat(buffer, " ");
@@ -121,7 +120,7 @@ int sukromnyChat(char *meno, int sockfd) {
     } else {
         pocetSpravVBuffri++;
         // odosielatel>prijimatel: obsah spravy\n
-        strcat(historiaSprav, name);
+        strcat(historiaSprav, clientName);
         strcat(historiaSprav, ">");
         strcat(historiaSprav, meno);
         strcat(historiaSprav, ": ");
@@ -142,9 +141,6 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
     scanf("%[^\n]s", &sprava);
     getchar();
 
-
-    //strcat(buffer, " ");
-    //strcat(buffer, name);
     char kopiaPrijemcov[BUFFER_SIZE];
     bzero(kopiaPrijemcov, BUFFER_SIZE);
     strcpy(kopiaPrijemcov, prijemcovia);
@@ -160,7 +156,7 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
         }
 
         strcat(buffer, " ");
-        strcat(buffer, name); //moje meno
+        strcat(buffer, clientName); //moje meno
         strcat(buffer, " ");
         if (i == 0) {
             strcat(buffer, strtok_r(kopiaPrijemcov, " ", &ptr));
@@ -233,7 +229,7 @@ void onlineUzivatelia(int sockfd) {
     writeToSocket(buffer, sockfd);
 }
 
-void vypisHistoriu(char *sKym) {
+void vypisHistoriuChatu(char *menoPrijemcu) {
     char kopiaHistorieSprav[BUFFER_HISTORIA_SPRAV_SIZE];
     bzero(kopiaHistorieSprav, BUFFER_HISTORIA_SPRAV_SIZE);
     strcpy(kopiaHistorieSprav, historiaSprav);
@@ -244,7 +240,7 @@ void vypisHistoriu(char *sKym) {
         char *sprava;
         char *ptr;
 
-        if(i == 0) {
+        if (i == 0) {
             odosielatel = strtok_r(kopiaHistorieSprav, ">", &ptr);
         } else {
             odosielatel = strtok_r(NULL, ">", &ptr);
@@ -252,83 +248,82 @@ void vypisHistoriu(char *sKym) {
         prijimatel = strtok_r(NULL, ":", &ptr);
         sprava = strtok_r(NULL, "\n", &ptr);
 
-        if ( (strcmp(odosielatel, sKym) == 0) || (strcmp(prijimatel, sKym) == 0) ) {
+        if ((strcmp(odosielatel, menoPrijemcu) == 0) || (strcmp(prijimatel, menoPrijemcu) == 0)) {
             vypisanieSpravyZHistorie(odosielatel, prijimatel, sprava);
         }
     }
 }
 
+void ulozPrijatuSpravuDoHistorie(char *kopiaSpravy) {
+    strtok(kopiaSpravy, " ");
+
+    char *odosielatel;
+    odosielatel = strtok(NULL, " ");
+    char *sprava;
+    sprava = strtok(NULL, "\0");
+
+    pocetSpravVBuffri++;
+
+    // odosielatel>prijimatel: obsah spravy\n
+    strcat(historiaSprav, odosielatel);
+    strcat(historiaSprav, ">");
+    strcat(historiaSprav, clientName);
+    strcat(historiaSprav, ": ");
+    strcat(historiaSprav, sprava);
+}
+
 void spracujPrikazZoServera(char *prikaz, char *kopiaSpravy) {
 
-
     if (strcmp(prikaz, NEUSPESNA_REGISTRACIA) == 0) {
-        puts("\n\033[31;1mKLIENT: Registracia bola neuspesna!\033[0m\n");
+        vypisNeuspesnaRegistracia();
 
     } else if (strcmp(prikaz, USPESNA_REGISTRACIA) == 0) {
         jePrihlaseny = 1;
-        puts("\n\033[32;1mKLIENT: Registracia prebehla uspesne!\033[0m\n");
+        vypisUspesnaRegistracia();
 
     } else if (strcmp(prikaz, NEUSPESNE_PRIHLASENIE) == 0) {
-        puts("\n\033[31;1mKLIENT: Prihlasenie bolo neuspesne!\033[0m\n");
+        vypisNeuspesnePrihlasenie();
 
     } else if (strcmp(prikaz, USPESNE_PRIHLASENIE) == 0) {
         jePrihlaseny = 1;
-        puts("\n\033[32;1mKLIENT: Prihlasenie prebehlo uspesne!\033[0m\n");
+        vypisUspesnePrihlasenie();
 
     } else if (strcmp(prikaz, NEUSPESNE_ZRUSENIE) == 0) {
-        puts("\n\033[31;1mKLIENT: Zrusenie uctu bolo neuspesne!\033[0m\n");
+        vypisNeuspesneZrusenie();
 
     } else if (strcmp(prikaz, USPESNE_ZRUSENIE) == 0) {
-        puts("\n\033[32;1mKLIENT: Zrusenie uctu prebehlo uspesne!\033[0m\n");
+        vypisUspesneZrusenieUctu();
 
     } else if (strcmp(prikaz, SPRAVA_ODOSIELATELOVI) == 0) {
-        puts("\n\033[32;1mKLIENT: Sprava bola prijata serverom na spracovanie!\033[0m\n");
+        vypisSpravaPrijataServerom();
 
     } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
-        vypisanieNovejSpravy(prikaz);
-
-        strtok(kopiaSpravy, " ");
-
-        char *odosielatel;
-        odosielatel = strtok(NULL, " ");
-        char *sprava;
-        sprava = strtok(NULL, "\0");
-
-        pocetSpravVBuffri++;
-
-        // odosielatel>prijimatel: obsah spravy\n
-        strcat(historiaSprav, odosielatel);
-        strcat(historiaSprav, ">");
-        strcat(historiaSprav, name);
-        strcat(historiaSprav, ": ");
-        strcat(historiaSprav, sprava);
+        vypisNovejSpravy(prikaz);
+        ulozPrijatuSpravuDoHistorie(kopiaSpravy);
 
     } else if ((strcmp(prikaz, SPRAVA_PRIJIMATELOVI_SKUPINA) == 0)) {
-        vypisanieNovejSpravy(prikaz);
+        vypisNovejSpravy(prikaz);
+
     } else if (strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {
         vypisOnlineUzivatelov();
 
     } else if (strcmp(prikaz, PRIDANIE_PRIATELA) == 0) {
-        vypisPridaniePriatelaServer();
+        vypisPridaniePriatela();
 
     } else if (strcmp(prikaz, ODSTRANENIE_PRIATELA) == 0) {
-
         vypisOdstraneniePriatelaServer();
+
     } else if (strcmp(prikaz, NEMOZNO_SPRIATELIT) == 0) {
-        char *meno = strtok(NULL, "\0");
-        printf("MENO: %s\n", meno);
-        odstranPriatela(meno);
-        puts("\n\033[31;1mKLIENT: Pridanie priatela bolo neuspesne!\033[0m\n");
+        vypisNemoznoSpriatelit();
 
     } else if (strcmp(prikaz, NEZRUSENIE_PRIATELSTVA) == 0) {
-        char *meno = strtok(NULL, "\0");
-        printf("MENO: %s\n", meno);
-        pridajPriatela(meno);
-        puts("\n\033[31;1mKLIENT: Zrusenie priatelstva bolo neuspesne!\033[0m\n");
+        vypisNezruseniePriatelstva();
+
     } else {
-        printf("\n\033[31;1mKlient prijal neznamy prikaz od serveru:\033[0m %s\n", prikaz);
+        vypisNeznamyPrikaz(prikaz);
     }
 }
+
 
 const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
@@ -359,7 +354,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                 getchar();
 
                 if (jePriatel(menoPrijemcuSpravy) == 1) {
-                    vypisHistoriu(menoPrijemcuSpravy);
+                    vypisHistoriuChatu(menoPrijemcuSpravy);
                     zacalChat = 1;
                     prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
                 } else {
@@ -368,13 +363,14 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                 }
 
             } else {
-                vypisHistoriu(menoPrijemcuSpravy);
+                vypisHistoriuChatu(menoPrijemcuSpravy);
                 prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
             }
             if (prebiehaSukromnyChat == 0) {
                 zacalChat = 0;
                 return BREAK;
             }
+
             // skupinovy chat
         } else if (akcia == 2) {
             if (zacalChat == 0) {
@@ -419,6 +415,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
         } else if (akcia == 3) {
             onlineUzivatelia(sockfd);
+
         } else if (akcia == 4) {
             pridaniePriatelaKlient(sockfd);
             return BREAK;
@@ -430,10 +427,12 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
         } else if (akcia == 6) {
             vypisZoznamPriatelov();
             return BREAK;
+
         } else if (akcia == 7) {
             jePrihlaseny = 0;
-            freePriatelia();
+            freePolePriatelov();
             return BREAK;
+
         } else {
             printf("\n\033[31;1mNespravne cislo akcie!\033[0m\n\n");
             return BREAK;

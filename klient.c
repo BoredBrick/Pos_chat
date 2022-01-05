@@ -43,7 +43,7 @@ void *serverListener(void *data) {
     return NULL;
 }
 
-void *klientZapisuje(void *data) {
+void *clientWriter(void *data) {
     D *d = data;
 
     pthread_mutex_lock(&mutexKlient);
@@ -69,7 +69,7 @@ void *klientZapisuje(void *data) {
 
         if (akcia == 0) {
             if(jePrihlaseny) {
-                freePriatelia();
+                freePolePriatelov();
             }
             (*d->bolExit) = 1;
             ukoncenieAplikacie(d->datasockfd);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
     int bolExit = 0;
     D d = {datasockfd, &bolExit};
 
-    pthread_create(&vlaknoKlienta, NULL, &klientZapisuje, &d);
+    pthread_create(&vlaknoKlienta, NULL, &clientWriter, &d);
     pthread_create(&vlaknoServera, NULL, &serverListener, &d);
 
     pthread_join(vlaknoKlienta, NULL);

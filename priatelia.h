@@ -13,10 +13,11 @@ typedef struct {
     char name[LOGIN_MAX_DLZKA];
 } priatel;
 priatel *priatelia[MAX_POCET_PRIATELOV];
-char name[LOGIN_MAX_DLZKA];
+
+char clientName[LOGIN_MAX_DLZKA];
 int pocetPriatelov = 0;
 
-void freePriatelia() {
+void freePolePriatelov() {
     for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
         if (priatelia[i]) {
             free(priatelia[i]);
@@ -46,11 +47,9 @@ void posliZiadostOPriatelstvo(int sockfd, char *komu) {
     strcat(buffer, " ");
     strcat(buffer, komu);
     strcat(buffer, " ");
-    strcat(buffer, name);
+    strcat(buffer, clientName);
 
     sifrujRetazec(buffer, buffer);
-
-    // Poslanie udajov serveru
     writeToSocket(buffer, sockfd);
 }
 
@@ -82,7 +81,7 @@ void nacitajZoznamPriatelov() {
 
     char nazovSuboru[BUFFER_SIZE];
     bzero(nazovSuboru, BUFFER_SIZE);
-    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, clientName);
     strcat(nazovSuboru, ".txt");
 
     suborPriatelia = fopen(nazovSuboru, "a+");
@@ -119,7 +118,7 @@ void pridajPriatela(char *menoPridavaneho) {
 
     char nazovSuboru[BUFFER_SIZE];
     bzero(nazovSuboru, BUFFER_SIZE);
-    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, clientName);
     strcat(nazovSuboru, ".txt");
 
     suborPriatelia = fopen(nazovSuboru, "a+");
@@ -150,7 +149,7 @@ void odstranPriatela(char *menoOdstranovaneho) {
 
     char nazovSuboru[BUFFER_SIZE];
     bzero(nazovSuboru, BUFFER_SIZE);
-    strcat(nazovSuboru, name);
+    strcat(nazovSuboru, clientName);
     strcat(nazovSuboru, ".txt");
 
     suborPriatelia = fopen(nazovSuboru, "a+");
@@ -210,11 +209,9 @@ void posliInfoOOdstraneniZPriatelov(int sockfd, char *komu) {
     strcat(buffer, " ");
     strcat(buffer, komu);
     strcat(buffer, " ");
-    strcat(buffer, name);
+    strcat(buffer, clientName);
 
     sifrujRetazec(buffer, buffer);
-
-    // Poslanie udajov serveru
     writeToSocket(buffer, sockfd);
 }
 
@@ -224,7 +221,7 @@ void pridaniePriatelaKlient(int sockfd) {
     printf("\n\033[35;1mKLIENT: Zadajte meno pouzivatela, ktoreho chcete pridat do priatelov: \033[0m");
     scanf("%s", &menoPridavaneho);
     getchar();
-    if(strcmp(name, menoPridavaneho) != 0) {
+    if(strcmp(clientName, menoPridavaneho) != 0) {
         pridajPriatela(menoPridavaneho);
         posliZiadostOPriatelstvo(sockfd, menoPridavaneho);
     } else {

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <malloc.h>
-#include "procedury.h"
+#include "vypisy.h"
 
 #ifndef POS_ZAPOCET_2_SERVER_H
 #define POS_ZAPOCET_2_SERVER_H
@@ -158,10 +158,6 @@ int zrusenieUctu(char *login, char *heslo) {
         strcat(nazovSuboru, ".txt");
 
         // vymazanie obsahu suboru
-        //FILE *priatelia;
-        //priatelia = fopen(nazovSuboru, "w");
-        //fclose(priatelia);
-
         if (remove(nazovSuboru) != 0) {
             printf("Nepodarilo sa odstranit subor\n");
         }
@@ -188,6 +184,3 @@ void spracovanieChatovania(int clientSockFD,char *typSpravy);
 
 void spracovanieZruseniaUctu(int clientSockFD);
 
-void writeToSocket(char buffer[], int sockfd);
-
-void listenToClient(char buffer[], int sockfd);

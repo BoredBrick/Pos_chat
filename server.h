@@ -153,6 +153,7 @@ int zrusenieUctu(char *login, char *heslo) {
         }
 
         char nazovSuboru[BUFFER_SIZE];
+        bzero(nazovSuboru, BUFFER_SIZE);
         strcat(nazovSuboru, login);
         strcat(nazovSuboru, ".txt");
 

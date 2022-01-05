@@ -43,9 +43,10 @@ const char *NEZRUSENIE_PRIATELSTVA = "nezrusenie_priatelstva";
 #define MESSAGE_MAX_DLZKA 30
 #define LOGIN_MAX_DLZKA 30
 #define HESLO_MAX_DLZKA 60
-#define SPRAVA_MAX_DLZKA 100
+#define SPRAVA_MAX_DLZKA 200
 #define KLIENTI_MAX_POCET 10
 #define MAX_POCET_PRIATELOV 10
+#define BUFFER_HISTORIA_SPRAV_SIZE 1024
 const char *MENO_SUBORU = "zaregistrovani_pouzivatelia.txt";
 
 void sifrujRetazec(char *vysledok, char *retazec) {

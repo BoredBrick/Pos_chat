@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include "vypisy.h"
 
+char historiaSprav[BUFFER_HISTORIA_SPRAV_SIZE];
 char menoPrijemcuSpravy[LOGIN_MAX_DLZKA];
 char prijemcovia[BUFFER_SIZE];
 int jePrihlaseny = 0;
@@ -27,6 +28,7 @@ int prebiehaSukromnyChat = 0;
 int zacalChat = 0;
 int pocetPrijemcov = 0;
 int nieJePriatel = 0;
+int pocetSpravVBuffri = 0;
 
 int registracia(int sockfd) {
     char login[LOGIN_MAX_DLZKA], heslo[HESLO_MAX_DLZKA], potvrdeneHeslo[HESLO_MAX_DLZKA], buffer[BUFFER_SIZE];
@@ -110,7 +112,6 @@ int sukromnyChat(char *meno, int sockfd) {
     strcat(buffer, sprava); //
     buffer[strcspn(buffer, "\n")] = 0;
 
-
     sifrujRetazec(buffer, buffer);
 
     writeToSocket(buffer, sockfd);
@@ -118,6 +119,15 @@ int sukromnyChat(char *meno, int sockfd) {
     if (strcmp(sprava, "exit") == 0) {
         return 0;
     } else {
+        pocetSpravVBuffri++;
+        // odosielatel>prijimatel: obsah spravy\n
+        strcat(historiaSprav, name);
+        strcat(historiaSprav, ">");
+        strcat(historiaSprav, meno);
+        strcat(historiaSprav, ": ");
+        strcat(historiaSprav, sprava);
+        strcat(historiaSprav, "\n");
+
         return 1;
     }
 }
@@ -225,7 +235,7 @@ void onlineUzivatelia(int sockfd) {
 }
 
 
-void spracujPrikazZoServera(char *prikaz) {
+void spracujPrikazZoServera(char *prikaz, char *kopiaSpravy) {
 
 
     if (strcmp(prikaz, NEUSPESNA_REGISTRACIA) == 0) {
@@ -309,6 +319,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                 getchar();
 
                 if (jePriatel(menoPrijemcuSpravy) == 1) {
+                    vypisHistoriu(menoPrijemcuSpravy);
                     zacalChat = 1;
                     prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
                 } else {
@@ -317,6 +328,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
                 }
 
             } else {
+                vypisHistoriu(menoPrijemcuSpravy);
                 prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
             }
             if (prebiehaSukromnyChat == 0) {

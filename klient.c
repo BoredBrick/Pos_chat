@@ -28,8 +28,12 @@ void *serverListener(void *data) {
             odsifrujRetazec(msgBuffer, msgBuffer);
 
             char *prikaz;
+            char kopiaSpravy[SPRAVA_MAX_DLZKA];
+            bzero(kopiaSpravy, SPRAVA_MAX_DLZKA);
+
+            strcpy(kopiaSpravy, msgBuffer);
             prikaz = strtok(msgBuffer, " "); // vyseknutie prikazu zo serveru
-            spracujPrikazZoServera(prikaz);
+            spracujPrikazZoServera(prikaz, kopiaSpravy);
 
             bzero(msgBuffer, BUFFER_SIZE);
         }
@@ -118,6 +122,8 @@ int main(int argc, char *argv[]) {
         perror("Error connecting to socket");
         return 4;
     }
+
+    bzero(historiaSprav, BUFFER_HISTORIA_SPRAV_SIZE);
 
     int datasockfd = sockfd;
     int bolExit = 0;

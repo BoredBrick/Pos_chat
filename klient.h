@@ -21,9 +21,12 @@
 char menoPrijemcuSpravy[LOGIN_MAX_DLZKA];
 char prijemcovia[BUFFER_SIZE];
 int jePrihlaseny = 0;
-int prebiehaChat = 0;
-int zacalChat = 0;
+int prebiehaSkupinovyChat = 0;
+int prebiehaSukromnyChat = 0;
 
+int zacalChat = 0;
+int pocetPrijemcov = 0;
+int nieJePriatel = 0;
 
 int registracia(int sockfd) {
     char login[LOGIN_MAX_DLZKA], heslo[HESLO_MAX_DLZKA], potvrdeneHeslo[HESLO_MAX_DLZKA], buffer[BUFFER_SIZE];
@@ -144,7 +147,7 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
         if (strcmp(sprava, "exit") == 0) {
             strcat(buffer, UKONCENIE_CHATOVANIA);
         } else {
-            strcat(buffer, CHATOVANIE);
+            strcat(buffer, SKUPINOVY_CHAT);
         }
 
         strcat(buffer, " ");
@@ -221,16 +224,6 @@ void onlineUzivatelia(int sockfd) {
     writeToSocket(buffer, sockfd);
 }
 
-void freePriatelov() {
-    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
-        if (priatelia[i]) {
-            free(priatelia[i]);
-            priatelia[i] = NULL;
-        }
-    }
-    pocetPriatelov = 0;
-}
-
 
 void spracujPrikazZoServera(char *prikaz) {
 
@@ -259,8 +252,9 @@ void spracujPrikazZoServera(char *prikaz) {
         puts("\n\033[32;1mKLIENT: Sprava bola prijata serverom na spracovanie!\033[0m\n");
 
     } else if (strcmp(prikaz, SPRAVA_PRIJIMATELOVI) == 0) {
-        vypisanieNovejSpravy();
-
+        vypisanieNovejSpravy(prikaz);
+    } else if ((strcmp(prikaz, SPRAVA_PRIJIMATELOVI_SKUPINA) == 0)) {
+        vypisanieNovejSpravy(prikaz);
     } else if (strcmp(prikaz, ZOZNAM_ONLINE_UZIVATELOV) == 0) {
         vypisOnlineUzivatelov();
 
@@ -316,29 +310,28 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
                 if (jePriatel(menoPrijemcuSpravy) == 1) {
                     zacalChat = 1;
-                    prebiehaChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
+                    prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
                 } else {
                     printf("\n\033[31;1mKLIENT: Zadany pouzivatel nie je vo Vasom zozname priatelov.\033[0m\n");
                     return BREAK;
                 }
 
             } else {
-                prebiehaChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
+                prebiehaSukromnyChat = sukromnyChat(menoPrijemcuSpravy, sockfd);
             }
-            if (prebiehaChat == 0) {
+            if (prebiehaSukromnyChat == 0) {
                 zacalChat = 0;
                 return BREAK;
             }
             // skupinovy chat
         } else if (akcia == 2) {
-            int pocet = 0;
-            int nieJePriatel = 0;
             if (zacalChat == 0) {
+                nieJePriatel = 0;
                 bzero(prijemcovia, BUFFER_SIZE);
                 printf("\n\033[35;1mKLIENT: Zadajte pocet pouzivatelov, s ktorymi budete konverzovat: \033[0m");
-                scanf("%d", &pocet);
-                if (pocet >= 2) {
-                    for (int i = 0; i < pocet; ++i) {
+                scanf("%d", &pocetPrijemcov);
+                if (pocetPrijemcov >= 2) {
+                    for (int i = 0; i < pocetPrijemcov; ++i) {
                         bzero(menoPrijemcuSpravy, LOGIN_MAX_DLZKA);
                         printf("\n\033[35;1mKLIENT: Zadajte meno %d. pouzivatela, s ktorym chcete zacat skupinovu konverzaciu: \033[0m",
                                (i + 1));
@@ -387,7 +380,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
             return BREAK;
         } else if (akcia == 7) {
             jePrihlaseny = 0;
-            freePriatelov();
+            freePriatelia();
             return BREAK;
         } else {
             printf("\n\033[31;1mNespravne cislo akcie!\033[0m\n\n");

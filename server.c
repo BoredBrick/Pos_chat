@@ -100,8 +100,8 @@ void *obsluhaKlienta(void *arg) {
         } else if (strcmp(typSpravy, PRIHLASENIE) == 0) {
             spracovaniePrihlasenia(clientSockFD);
 
-        } else if (strcmp(typSpravy, CHATOVANIE) == 0) {
-            spracovanieChatovania(clientSockFD);
+        } else if ((strcmp(typSpravy, CHATOVANIE) == 0) || (strcmp(typSpravy, SKUPINOVY_CHAT) == 0)) {
+            spracovanieChatovania(clientSockFD, typSpravy);
 
         } else if (strcmp(typSpravy, ZRUSENIE_UCTU) == 0) {
             spracovanieZruseniaUctu(clientSockFD);
@@ -119,7 +119,6 @@ void *obsluhaKlienta(void *arg) {
 
         } else if (strcmp(typSpravy, ZRUS_PRIATELA) == 0) {
             oznamenieOOdstraneniZPriatelov(clientSockFD);
-
         }
     }
 
@@ -266,7 +265,7 @@ void spracovanieRegistracie(int clientSockFD) {
 
 }
 
-void spracovanieChatovania(int clientSockFD) {
+void spracovanieChatovania(int clientSockFD, char *typSpravy) {
     // mojeMeno admin text spravy
     // ODOSIELATEL PRIJIMATEL SPRAVA
 
@@ -289,7 +288,11 @@ void spracovanieChatovania(int clientSockFD) {
 
     char pomocnyBuffer[BUFFER_SIZE];
     bzero(pomocnyBuffer, BUFFER_SIZE);
-    strcat(pomocnyBuffer, SPRAVA_PRIJIMATELOVI);
+    if((strcmp(typSpravy, CHATOVANIE) == 0)) {
+        strcat(pomocnyBuffer, SPRAVA_PRIJIMATELOVI);
+    } else {
+        strcat(pomocnyBuffer, SPRAVA_PRIJIMATELOVI_SKUPINA);
+    }
     strcat(pomocnyBuffer, " ");
     strcat(pomocnyBuffer, odosielatel);
     strcat(pomocnyBuffer, " ");

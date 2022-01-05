@@ -184,7 +184,7 @@ void spracovanieRegistracie(int newsockfd);
 
 void spracovaniePrihlasenia(int newsockfd);
 
-void spracovanieChatovania(int clientSockFD);
+void spracovanieChatovania(int clientSockFD,char *typSpravy);
 
 void spracovanieZruseniaUctu(int clientSockFD);
 

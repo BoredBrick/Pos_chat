@@ -18,7 +18,7 @@ const char *EXIT = "exit";
 const char *NOVY_PRIATEL = "novy_priatel";
 const char *ZRUS_PRIATELA = "zrus_priatela";
 const char *BREAK = "break";
-const char *CONTINUE = "continue";
+const char *SKUPINOVY_CHAT = "skupinovy_chat";
 
 
 // SPRAVY OD SERVERA
@@ -30,6 +30,7 @@ const char *USPESNE_ZRUSENIE = "uspesne_zrusenie";
 const char *NEUSPESNE_ZRUSENIE = "neuspesne_zrusenie";
 const char *SPRAVA_ODOSIELATELOVI = "sprava_odosielatelovi";
 const char *SPRAVA_PRIJIMATELOVI = "sprava_prijimatelovi";
+const char *SPRAVA_PRIJIMATELOVI_SKUPINA = "sprava_prijimatelovi_SKUPINA";
 const char *ZOZNAM_ONLINE_UZIVATELOV = "zoznam_online_uzivatelov";
 const char *PRIDANIE_PRIATELA = "pridanie_priatela";
 const char *ODSTRANENIE_PRIATELA = "odstranenie_priatela";

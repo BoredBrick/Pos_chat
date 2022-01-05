@@ -31,12 +31,16 @@ void vypisHlavneMenu() {
     printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
 }
 
-void vypisanieNovejSpravy() {
+void vypisanieNovejSpravy(char* typSpravy) {
     char *odosielatel;
     char *sprava;
     odosielatel = strtok(NULL, " ");
     sprava = strtok(NULL, "\0");
-    printf("\n\033[34;1mNOVA SPRAVA od \033[0m%s\033[34;1m:\033[0m %s\n", odosielatel, sprava);
+    if((strcmp(typSpravy, SPRAVA_PRIJIMATELOVI) == 0)) {
+        printf("\n\033[34;1mNOVA\033[0m \033[33;1mSUKROMNA\033[0m \033[34;1mSPRAVA od \033[0m%s\033[34;1m:\033[0m %s\n", odosielatel, sprava);
+    } else {
+        printf("\n\033[34;1mNOVA\033[0m \033[32;1mSKUPINOVA\033[0m \033[34;1mSPRAVA od \033[0m%s\033[34;1m:\033[0m %s\n", odosielatel, sprava);
+    }
     fflush(stdout);
 }
 

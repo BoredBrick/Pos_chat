@@ -16,6 +16,16 @@ priatel *priatelia[MAX_POCET_PRIATELOV];
 char name[LOGIN_MAX_DLZKA];
 int pocetPriatelov = 0;
 
+void freePriatelia() {
+    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
+        if (priatelia[i]) {
+            free(priatelia[i]);
+            priatelia[i] = NULL;
+        }
+    }
+    pocetPriatelov = 0;
+}
+
 int jePriatel(char *meno) {
     int ret = 0;
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {

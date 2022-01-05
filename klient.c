@@ -65,25 +65,13 @@ void *klientZapisuje(void *data) {
 
         if (akcia == 0) {
             if(jePrihlaseny) {
-                for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
-                    if (priatelia[i]) {
-                        free(priatelia[i]);
-                        priatelia[i] = NULL;
-                    }
-                }
-                pocetPriatelov = 0;
+                freePriatelia();
             }
             (*d->bolExit) = 1;
             ukoncenieAplikacie(d->datasockfd);
             break;
         }
         spracujUzivatelovuAkciu(akcia, d->datasockfd);
-//        const char *res = spracujUzivatelovuAkciu(akcia, d->datasockfd);
-//        if (strcmp(res, BREAK) == 0) {
-//            break;
-//        } else if (strcmp(res, CONTINUE) == 0) {
-//            continue;
-//        }
         usleep(500000);
     }
 
@@ -141,11 +129,6 @@ int main(int argc, char *argv[]) {
     pthread_join(vlaknoKlienta, NULL);
     pthread_join(vlaknoServera, NULL);
 
-//    for (int i = 0; i < KLIENTI_MAX_POCET; ++i) {
-//        if (priatelia[i]) {
-//            free(priatelia[i]);
-//        }
-//    }
     close(sockfd);
 
     return 0;

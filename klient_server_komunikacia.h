@@ -17,7 +17,7 @@ void writeToSocket(char *buffer, int sockfd) {
     }
 }
 
-void listenToServer(char *buffer, int sockfd) {
+void listenToSocket(char *buffer, int sockfd) {
     bzero(buffer, 256);
     int n = read(sockfd, buffer, 256 - 1);
     if (n < 0) {

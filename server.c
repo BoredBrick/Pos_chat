@@ -55,7 +55,7 @@ void odoberKlienta(int clientID) {
 void send_message(char *s, char *komu) {
 //    pthread_mutex_lock(&clients_mutex);
 //    int socket = najdiSocketPodlaMena(komu);
-//    writeToClient(s,socket);
+//    writeToSocket(s,socket);
 //    pthread_mutex_unlock(&clients_mutex);
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < KLIENTI_MAX_POCET; i++) {

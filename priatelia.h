@@ -41,7 +41,7 @@ void posliZiadostOPriatelstvo(int sockfd, char *komu) {
     sifrujRetazec(buffer, buffer);
 
     // Poslanie udajov serveru
-    writeToServer(buffer, sockfd);
+    writeToSocket(buffer, sockfd);
 }
 
 void pridajDoPolaPriatelov(priatel *priatel) {
@@ -205,7 +205,7 @@ void posliInfoOOdstraneniZPriatelov(int sockfd, char *komu) {
     sifrujRetazec(buffer, buffer);
 
     // Poslanie udajov serveru
-    writeToServer(buffer, sockfd);
+    writeToSocket(buffer, sockfd);
 }
 
 void pridaniePriatelaKlient(int sockfd) {

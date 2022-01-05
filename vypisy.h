@@ -20,12 +20,13 @@ void vypisUvodneMenu(){
 
 void vypisHlavneMenu() {
     puts("\n\033[36;1m|--- CHAT APP ---|\033[0m");
-    puts("[1] Posli spravu");
-    puts("[2] Odhlasenie");
+    puts("[1] Sukromny chat");
+    puts("[2] Skupinovy chat");
     puts("[3] Online uzivatelia");
     puts("[4] Pridaj priatela");
     puts("[5] Odstran priatela");
     puts("[6] Zoznam priatelov");
+    puts("[7] Odhlasenie");
     puts("[0] Koniec");
     printf("\n\033[35;1mKLIENT: Zadajte akciu: \033[0m");
 }

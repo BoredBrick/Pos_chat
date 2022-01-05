@@ -162,7 +162,7 @@ int skupinovyChat(int pocet, char *prijemcovia, int sockfd) {
 
         writeToSocket(buffer, sockfd);
 
-        // zapisovanie na socket trva dlhsie ako jedna iteracia cyklu, preto sleep
+        // zapisovanie na socket trva dlhsie ako jedna iteracia cyklu, preto musime pockat
         sleep(1);
     }
 
@@ -346,7 +346,7 @@ const char *spracujUzivatelovuAkciu(int akcia, int sockfd) {
 
                         if (jePriatel(menoPrijemcuSpravy) != 1) {
                             nieJePriatel = 1;
-                            printf("\n\033[31;1mKLIENT: Zadany pouzivatel\033[0m %s \033[31;1mnie je vo Vasom zozname priatelov.\033[0m\n",
+                            printf("\n\033[31;1mKLIENT: Zadany pouzivatel %s nie je vo Vasom zozname priatelov.\033[0m\n",
                                    menoPrijemcuSpravy);
                             break;
                         }

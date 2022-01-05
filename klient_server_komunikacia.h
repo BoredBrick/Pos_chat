@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void writeToServer(char *buffer, int sockfd) {
+void writeToSocket(char *buffer, int sockfd) {
     int n = write(sockfd, buffer, strlen(buffer));
     if (n < 0) {
         perror("Error writing to socket");

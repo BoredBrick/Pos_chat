@@ -188,6 +188,6 @@ void spracovanieChatovania(int clientSockFD);
 
 void spracovanieZruseniaUctu(int clientSockFD);
 
-void writeToClient(char buffer[], int sockfd);
+void writeToSocket(char buffer[], int sockfd);
 
 void listenToClient(char buffer[], int sockfd);

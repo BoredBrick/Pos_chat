@@ -23,7 +23,7 @@ void *serverListener(void *data) {
         pthread_mutex_unlock(&mutexKlient);
 
         if (recv(d->datasockfd, msgBuffer, BUFFER_SIZE, MSG_PEEK) > 0) {
-            listenToServer(msgBuffer, d->datasockfd);
+            listenToSocket(msgBuffer, d->datasockfd);
 
             odsifrujRetazec(msgBuffer, msgBuffer);
 

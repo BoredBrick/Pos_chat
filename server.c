@@ -232,7 +232,7 @@ void spracovaniePrihlasenia(int clientSockFD) {
 
     }
     sifrujRetazec(msg, msg);
-    writeToClient(msg, clientSockFD);
+    writeToSocket(msg, clientSockFD);
 }
 
 void spracovanieRegistracie(int clientSockFD) {
@@ -262,7 +262,7 @@ void spracovanieRegistracie(int clientSockFD) {
 
     }
     sifrujRetazec(msg, msg);
-    writeToClient(msg, clientSockFD);
+    writeToSocket(msg, clientSockFD);
 
 }
 
@@ -285,7 +285,7 @@ void spracovanieChatovania(int clientSockFD) {
     bzero(msg, MESSAGE_MAX_DLZKA);
     strcpy(msg, SPRAVA_ODOSIELATELOVI);
     sifrujRetazec(msg, msg);
-    writeToClient(msg, clientSockFD);
+    writeToSocket(msg, clientSockFD);
 
     char pomocnyBuffer[BUFFER_SIZE];
     bzero(pomocnyBuffer, BUFFER_SIZE);
@@ -317,10 +317,10 @@ void spracovanieZruseniaUctu(int clientSockFD) {
     }
 
     sifrujRetazec(msg, msg);
-    writeToClient(msg, clientSockFD);
+    writeToSocket(msg, clientSockFD);
 }
 
-void writeToClient(char *buffer, int sockfd) {
+void writeToSocket(char *buffer, int sockfd) {
     int n = write(sockfd, buffer, strlen(buffer) + 1);
     if (n < 0) {
         perror("Error writing to socket");
@@ -351,7 +351,7 @@ void zoznamOnlinePouzivatelov(int clientSockFD) {
     }
     buffer[25] = pocetOnline + '0';
     sifrujRetazec(buffer, buffer);
-    writeToClient(buffer, clientSockFD);
+    writeToSocket(buffer, clientSockFD);
 }
 
 void oznamenieOPriatelstve(int clientSockFD) {
@@ -375,10 +375,10 @@ void oznamenieOPriatelstve(int clientSockFD) {
         strcat(newMsg, " ");
         strcat(newMsg, komu);
         sifrujRetazec(newMsg, newMsg);
-        writeToClient(newMsg, clientSockFD);
+        writeToSocket(newMsg, clientSockFD);
     } else {
         sifrujRetazec(msg, msg);
-        writeToClient(msg, socket);
+        writeToSocket(msg, socket);
     }
 }
 
@@ -403,10 +403,10 @@ void oznamenieOOdstraneniZPriatelov(int clientSockFD) {
         strcat(newMsg, " ");
         strcat(newMsg, komu);
         sifrujRetazec(newMsg, newMsg);
-        writeToClient(newMsg, clientSockFD);
+        writeToSocket(newMsg, clientSockFD);
     } else {
         sifrujRetazec(msg, msg);
-        writeToClient(msg, socket);
+        writeToSocket(msg, socket);
     }
 }
 

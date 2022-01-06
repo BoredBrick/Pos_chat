@@ -52,10 +52,20 @@ void odoberKlienta(int clientID) {
 //posle spravu konkretnemu clientID
 void send_message(char *s, char *komu) {
     pthread_mutex_lock(&clients_mutex);
-    int socket = najdiSocketPodlaMena(komu);
-    writeToSocket(s,socket);
+    for (int i = 0; i < KLIENTI_MAX_POCET; i++) {
+        if (klienti[i]) {
+            if (strcmp(klienti[i]->name, komu) == 0) {
+                printf("\n\033[34;1mSERVER Zapisujem na socket:\033[0m %d\n", klienti[i]->sockfd);
+                sifrujRetazec(s, s);
+                if (write(klienti[i]->sockfd, s, strlen(s)) < 0) {
+                    printf("ERROR: write to descriptor failed\n");
+                }
+                break;
+            }
+        }
+    }
     pthread_mutex_unlock(&clients_mutex);
-    pthread_mutex_unlock(&clients_mutex);
+
 }
 
 //funkcia, ktora bude vo vlakne cakat na to, pokial nedostane spravu od klienta, potom ju spracuje
